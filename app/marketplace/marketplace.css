@@ -1,0 +1,6 @@
+/* Garante que o scroll funcione no marketplace */
+html,
+body {
+  overflow-y: auto !important;
+  height: auto !important;
+}
