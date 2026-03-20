@@ -35,7 +35,7 @@ export function Features() {
           Diferenciais
         </div>
         <div className={`font-display text-[clamp(28px,4vw,44px)] font-bold leading-[1.15] tracking-tight mb-5 ${isIntersecting ? 'anim active d1' : 'anim d1'}`}>
-          Por que o Nex.to e diferente
+          Por que o Conekta e diferente
         </div>
         <div className={`text-[17px] text-steel leading-[1.7] max-w-[560px] mb-12 ${isIntersecting ? 'anim active d2' : 'anim d2'}`}>
           Construido para quem trabalha com manutencao industrial de verdade. Nao e um marketplace generico.

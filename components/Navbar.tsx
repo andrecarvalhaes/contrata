@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Search, MapPin, Menu, X } from 'lucide-react'
+import { Search, MapPin, Menu, X, ChevronDown, AlertTriangle, CreditCard, ShoppingCart } from 'lucide-react'
 
 interface NavbarProps {
   showSearch?: boolean
@@ -11,8 +11,36 @@ interface NavbarProps {
   onSearch?: () => void
 }
 
+const ferramentasConekta = [
+  {
+    href: '/conheca/sos',
+    icon: AlertTriangle,
+    label: 'SOS Conekta',
+    desc: 'Cotação urgente para todos os fornecedores',
+    color: 'text-red-600',
+    bgColor: 'bg-red-50',
+  },
+  {
+    href: '/conheca/conekta-pay',
+    icon: CreditCard,
+    label: 'Conekta Pay',
+    desc: 'Pagamento seguro e parcelado',
+    color: 'text-orange-600',
+    bgColor: 'bg-orange-50',
+  },
+  {
+    href: '/conheca/shop',
+    icon: ShoppingCart,
+    label: 'Shop Conekta',
+    desc: 'Marketplace de produtos',
+    color: 'text-purple',
+    bgColor: 'bg-purple-50',
+  },
+]
+
 export function Navbar({ showSearch = false, searchQuery = '', onSearchChange, onSearch }: NavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isFerramentasOpen, setIsFerramentasOpen] = useState(false)
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-[100] backdrop-blur-[20px] bg-white/95 border-b border-gray-200 transition-all">
@@ -61,6 +89,41 @@ export function Navbar({ showSearch = false, searchQuery = '', onSearchChange, o
 
           {/* Menu Desktop */}
           <div className="hidden md:flex gap-3 lg:gap-6 items-center flex-shrink-0">
+            {/* Dropdown Ferramentas */}
+            <div
+              className="relative"
+              onMouseEnter={() => setIsFerramentasOpen(true)}
+              onMouseLeave={() => setIsFerramentasOpen(false)}
+            >
+              <button className="flex items-center gap-1 text-sm text-gray-600 font-medium hover:text-purple transition-colors">
+                Ferramentas
+                <ChevronDown className="w-4 h-4" />
+              </button>
+
+              {isFerramentasOpen && (
+                <div className="absolute top-full left-0 mt-2 w-72 bg-white rounded-xl shadow-2xl border border-gray-200 p-2 z-50">
+                  {ferramentasConekta.map((ferramenta) => {
+                    const Icon = ferramenta.icon
+                    return (
+                      <Link
+                        key={ferramenta.href}
+                        href={ferramenta.href}
+                        className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                      >
+                        <div className={`w-10 h-10 ${ferramenta.bgColor} rounded-lg flex items-center justify-center flex-shrink-0`}>
+                          <Icon className={`w-5 h-5 ${ferramenta.color}`} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-gray-900">{ferramenta.label}</p>
+                          <p className="text-xs text-gray-500 mt-0.5">{ferramenta.desc}</p>
+                        </div>
+                      </Link>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+
             <Link href="/conheca" className="text-sm text-gray-600 font-medium hover:text-purple transition-colors">
               Conheça
             </Link>
@@ -131,6 +194,32 @@ export function Navbar({ showSearch = false, searchQuery = '', onSearchChange, o
       {isMobileMenuOpen && (
         <div className="md:hidden bg-white border-t border-gray-200">
           <div className="px-4 py-3 space-y-3">
+            {/* Ferramentas Conekta - Mobile */}
+            <div className="border-b border-gray-100 pb-3 mb-3">
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
+                Ferramentas Conekta
+              </p>
+              {ferramentasConekta.map((ferramenta) => {
+                const Icon = ferramenta.icon
+                return (
+                  <Link
+                    key={ferramenta.href}
+                    href={ferramenta.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center gap-3 py-2 hover:bg-gray-50 rounded-lg px-2 transition-colors"
+                  >
+                    <div className={`w-8 h-8 ${ferramenta.bgColor} rounded-lg flex items-center justify-center flex-shrink-0`}>
+                      <Icon className={`w-4 h-4 ${ferramenta.color}`} />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-gray-900">{ferramenta.label}</p>
+                      <p className="text-xs text-gray-500">{ferramenta.desc}</p>
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
+
             <Link
               href="/conheca"
               onClick={() => setIsMobileMenuOpen(false)}

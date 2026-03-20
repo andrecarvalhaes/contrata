@@ -9,24 +9,98 @@ export const useAuth = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthChange(async (firebaseUser) => {
-      setUser(firebaseUser);
+    // Verifica autenticação fake primeiro (para testes)
+    const checkFakeAuth = () => {
+      if (typeof window === 'undefined') return false;
 
-      if (firebaseUser) {
-        const userProfile = await getUserProfile(firebaseUser.uid);
-        setProfile(userProfile);
-      } else {
-        setProfile(null);
+      try {
+        const fakeAuth = localStorage.getItem('fakeAuth');
+        console.log('🔍 Verificando fakeAuth:', fakeAuth);
+
+        if (fakeAuth) {
+          const authData = JSON.parse(fakeAuth);
+          if (authData.loggedIn) {
+            console.log('✅ Usuário autenticado (fake):', authData.email);
+
+            // Cria um usuário fake
+            const fakeUser = {
+              uid: 'fake-user-id',
+              email: authData.email,
+              displayName: authData.name,
+            } as User;
+
+            setUser(fakeUser);
+            setProfile({
+              uid: 'fake-user-id',
+              email: authData.email,
+              name: authData.name,
+              createdAt: new Date(),
+            });
+            setLoading(false);
+            return true;
+          }
+        }
+      } catch (error) {
+        console.error('❌ Erro ao verificar autenticação fake:', error);
+      }
+      return false;
+    };
+
+    const initFirebaseAuth = () => {
+      let authResolved = false;
+
+      const unsubscribe = onAuthChange(async (firebaseUser) => {
+        authResolved = true;
+        setUser(firebaseUser);
+
+        if (firebaseUser) {
+          const userProfile = await getUserProfile(firebaseUser.uid);
+          setProfile(userProfile);
+        } else {
+          setProfile(null);
+        }
+
+        setLoading(false);
+      });
+
+      // Timeout de 10 segundos para prevenir loading infinito
+      const timeout = setTimeout(() => {
+        if (!authResolved) {
+          console.warn('⏱️ Firebase auth timeout - assumindo usuário não autenticado');
+          setLoading(false);
+          setUser(null);
+          setProfile(null);
+        }
+      }, 10000);
+
+      return () => {
+        unsubscribe();
+        clearTimeout(timeout);
+      };
+    };
+
+    // Pequeno delay para garantir que localStorage está disponível
+    const timer = setTimeout(() => {
+      // Se tem autenticação fake, usa ela
+      if (checkFakeAuth()) {
+        return;
       }
 
-      setLoading(false);
-    });
+      // Senão, tenta Firebase
+      const cleanup = initFirebaseAuth();
+      return cleanup;
+    }, 100);
 
-    return () => unsubscribe();
+    return () => clearTimeout(timer);
   }, []);
 
   const logout = async () => {
     try {
+      // Remove autenticação fake
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('fakeAuth');
+      }
+
       await signOut();
       setUser(null);
       setProfile(null);

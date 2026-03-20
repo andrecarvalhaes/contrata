@@ -51,7 +51,7 @@ export function CTA() {
               Preciso de manutencao
             </h3>
             <p className="text-[15px] text-steel leading-[1.65] mb-7 flex-1">
-              Entre na lista e seja um dos primeiros a usar a busca inteligente do Nex.to quando lancarmos.
+              Entre na lista e seja um dos primeiros a usar a busca inteligente do Conekta quando lancarmos.
             </p>
             <ul className="list-none mb-8">
               <li className="text-sm text-steel-light py-2 border-b border-indigo-light/[0.06] flex items-center gap-2.5">

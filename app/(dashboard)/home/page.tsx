@@ -79,11 +79,11 @@ const solicitacoes = [
 
 export default function HomePage() {
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 max-w-2xl mx-auto">
       {/* Boas-vindas */}
       <div>
         <h1 className="text-2xl font-bold text-[#1A1A2E]">
-          Olá, João 👋
+          Olá, João
         </h1>
         <p className="text-gray-500 text-sm mt-1">O que você precisa hoje?</p>
       </div>

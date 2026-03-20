@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -9,6 +10,7 @@ import { Eye, EyeOff, Plus, Trash2, CheckCircle2, ArrowLeft, ArrowRight, Store }
 import StepIndicator from "@/components/auth/StepIndicator";
 import CNPJInput, { CNPJData } from "@/components/auth/CNPJInput";
 import GoogleButton from "@/components/auth/GoogleButton";
+import { useAuthContext } from "@/components/providers/AuthProvider";
 
 // ─── Schemas ─────────────────────────────────────────────────────────────────
 
@@ -61,6 +63,8 @@ const STEPS = ["Dados pessoais", "Suas lojas", "Revisão"];
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function CadastroPage() {
+  const router = useRouter();
+  const { isAuthenticated, loading: authLoading } = useAuthContext();
   const [currentStep, setCurrentStep] = useState(0);
   const [step1Data, setStep1Data] = useState<Step1Data | null>(null);
   const [lojas, setLojas] = useState<LojaData[]>([]);
@@ -70,6 +74,12 @@ export default function CadastroPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [termsError, setTermsError] = useState(false);
+
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      router.replace("/home");
+    }
+  }, [authLoading, isAuthenticated, router]);
 
   // Current CNPJ form state (step 2)
   const [cnpjValue, setCnpjValue] = useState("");
@@ -172,7 +182,7 @@ export default function CadastroPage() {
             Conta criada com sucesso! 🎉
           </h1>
           <p className="text-sm text-gray-500 leading-relaxed mb-6">
-            Bem-vindo ao Nex.to, <strong>{step1Data?.nome.split(" ")[0]}</strong>!
+            Bem-vindo ao Conekta, <strong>{step1Data?.nome.split(" ")[0]}</strong>!
             Sua conta foi criada e suas lojas estão cadastradas.
           </p>
           <div className="bg-orange-50 rounded-xl p-4 mb-8 text-left">
@@ -203,7 +213,7 @@ export default function CadastroPage() {
             Criar conta
           </h1>
           <p className="text-sm text-gray-500">
-            Cadastre-se e comece a usar o Nex.to
+            Cadastre-se e comece a usar o Conekta
           </p>
         </div>
 
@@ -692,7 +702,7 @@ export default function CadastroPage() {
                 >
                   Política de Privacidade
                 </a>{" "}
-                do Nex.to
+                do Conekta
               </span>
             </label>
             {termsError && (

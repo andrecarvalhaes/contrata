@@ -37,7 +37,7 @@ export function Comparison() {
           Comparativo
         </div>
         <div className={`font-display text-[clamp(28px,4vw,44px)] font-bold leading-[1.15] tracking-tight mb-5 ${isIntersecting ? 'anim active d1' : 'anim d1'}`}>
-          Nex.to vs. o mercado
+          Conekta vs. o mercado
         </div>
         <div className={`text-[17px] text-steel leading-[1.7] max-w-[560px] mb-12 ${isIntersecting ? 'anim active d2' : 'anim d2'}`}>
           O que existe hoje nao foi feito para manutencao industrial.
@@ -48,7 +48,7 @@ export function Comparison() {
             <thead className="bg-ink-80">
               <tr>
                 <th className="px-5 py-4 font-display text-[13px] font-semibold text-steel-dark text-left border-b border-indigo-light/10"></th>
-                <th className="px-5 py-4 font-display text-[15px] font-semibold text-indigo-light text-center border-b border-indigo-light/10 bg-indigo-light/[0.06]">Nex.to</th>
+                <th className="px-5 py-4 font-display text-[15px] font-semibold text-indigo-light text-center border-b border-indigo-light/10 bg-indigo-light/[0.06]">Conekta</th>
                 <th className="px-5 py-4 font-display text-[13px] font-semibold text-steel text-center border-b border-indigo-light/10">Google</th>
                 <th className="px-5 py-4 font-display text-[13px] font-semibold text-steel text-center border-b border-indigo-light/10">GetNinjas</th>
                 <th className="px-5 py-4 font-display text-[13px] font-semibold text-steel text-center border-b border-indigo-light/10">Indicacao</th>
