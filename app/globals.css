@@ -1,102 +1,24 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-@layer utilities {
-  .bg-grid-pattern {
-    background-image:
-      linear-gradient(rgba(99, 102, 241, 0.06) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(99, 102, 241, 0.06) 1px, transparent 1px);
-  }
-
-  .bg-grid {
-    background-size: 60px 60px;
-  }
+:root {
+  --background: #f9fafb;
+  --foreground: #1A1A2E;
 }
 
-@layer components {
-  .anim {
-    opacity: 0;
-    animation: fadeUp 0.8s ease forwards;
-    animation-play-state: paused;
-  }
-
-  .anim.active {
-    animation-play-state: running;
-  }
-
-  .anim.d1 { animation-delay: 0.1s; }
-  .anim.d2 { animation-delay: 0.2s; }
-  .anim.d3 { animation-delay: 0.3s; }
-  .anim.d4 { animation-delay: 0.4s; }
-  .anim.d5 { animation-delay: 0.5s; }
-  .anim.d6 { animation-delay: 0.6s; }
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
 }
 
-@keyframes fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.4;
-  }
-}
-
-@keyframes blink {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0;
-  }
-}
-
-@keyframes blob {
-  0%, 100% {
-    transform: translate(0, 0) scale(1);
-  }
-  33% {
-    transform: translate(30px, -50px) scale(1.1);
-  }
-  66% {
-    transform: translate(-20px, 20px) scale(0.9);
-  }
-}
-
-@keyframes blob-slow {
-  0%, 100% {
-    transform: translate(-50%, -50%) scale(1);
-  }
-  50% {
-    transform: translate(-50%, -50%) scale(1.15);
-  }
-}
-
-@layer utilities {
-  .animate-blob {
-    animation: blob 20s ease-in-out infinite;
-  }
-
-  .animate-blob-slow {
-    animation: blob-slow 25s ease-in-out infinite;
-  }
-
-  .animation-delay-2000 {
-    animation-delay: 2s;
-  }
-
-  .animation-delay-4000 {
-    animation-delay: 4s;
-  }
+* {
+  box-sizing: border-box;
 }
