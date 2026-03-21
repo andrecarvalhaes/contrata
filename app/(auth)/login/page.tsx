@@ -58,8 +58,8 @@ export default function LoginPage() {
     console.log("Login fake realizado:", data.email);
     setIsLoading(false);
 
-    // Redireciona para o dashboard
-    router.push("/home");
+    // Redireciona para o dashboard com reload completo para atualizar o AuthProvider
+    window.location.href = "/home";
   };
 
   return (
