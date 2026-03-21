@@ -78,7 +78,7 @@ export default function SOSPage() {
   const canProceed = descricao.trim() && loja && categoria;
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-6xl mx-auto">
       {/* Hero urgente */}
       <div className="bg-gradient-to-br from-[#DC2626] to-[#991b1b] rounded-2xl p-6 sm:p-8 mb-6 shadow-lg">
         <div className="flex items-center gap-4 mb-3">

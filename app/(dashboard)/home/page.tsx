@@ -1,146 +1,158 @@
 "use client";
 
 import Link from "next/link";
-import { Search, MapPin, ChevronRight, AlertTriangle, MessageSquare, ShoppingCart, CreditCard, Building2, Clock } from "lucide-react";
+import { Search, AlertTriangle, MessageSquare, ShoppingCart, CreditCard, Building2, Clock, TrendingUp, ChevronRight, Zap } from "lucide-react";
 
 const quickActions = [
   {
     href: "/sos",
     icon: AlertTriangle,
     label: "SOS Conekta",
-    desc: "Urgência? Cotação imediata para todos os fornecedores",
-    bg: "bg-[#DC2626]",
-    textColor: "text-white",
-    descColor: "text-red-100",
+    desc: "Cotação urgente para todos os fornecedores",
+    gradient: "from-red-500 to-red-600",
+    bgGradient: "from-red-50 to-red-100",
+    highlight: true,
   },
   {
     href: "/nova-solicitacao",
     icon: MessageSquare,
     label: "Nova Solicitação",
-    desc: "Descreva e receba propostas",
-    bg: "bg-white",
-    textColor: "text-[#1A1A2E]",
-    descColor: "text-gray-500",
-    border: true,
+    desc: "Descreva e receba propostas personalizadas",
+    gradient: "from-purple to-purple-medium",
+    bgGradient: "from-purple/5 to-purple-light/10",
   },
   {
     href: "/shop",
     icon: ShoppingCart,
     label: "Shop Conekta",
     desc: "Produtos e peças para seu posto",
-    bg: "bg-white",
-    textColor: "text-[#1A1A2E]",
-    descColor: "text-gray-500",
-    border: true,
+    gradient: "from-purple-medium to-purple-light",
+    bgGradient: "from-purple/5 to-purple-light/10",
   },
   {
     href: "/conekta-pay",
     icon: CreditCard,
     label: "Conekta Pay",
-    desc: "Pague com segurança e parcelado",
-    bg: "bg-white",
-    textColor: "text-[#1A1A2E]",
-    descColor: "text-gray-500",
-    border: true,
+    desc: "Pague com segurança e parcelamento",
+    gradient: "from-purple to-purple-medium",
+    bgGradient: "from-purple/5 to-purple-light/10",
   },
 ];
 
 const lojas = [
-  { id: 1, nome: "Posto Exemplo", cidade: "São Paulo/SP" },
-  { id: 2, nome: "Auto Posto Centro", cidade: "Campinas/SP" },
+  { id: 1, nome: "Posto Exemplo", cidade: "São Paulo/SP", solicitacoes: 12, ativas: 3 },
+  { id: 2, nome: "Auto Posto Centro", cidade: "Campinas/SP", solicitacoes: 8, ativas: 1 },
+  { id: 3, nome: "Posto BR Sul", cidade: "Curitiba/PR", solicitacoes: 15, ativas: 5 },
 ];
 
 const solicitacoes = [
   {
     id: 1,
-    titulo: "Bomba de combustível",
+    titulo: "Manutenção em bomba de combustível",
     loja: "Posto Exemplo",
     status: "Aguardando propostas",
-    statusColor: "bg-yellow-100 text-yellow-700",
+    statusColor: "bg-amber-100 text-amber-700 border-amber-200",
     tempo: "2h atrás",
+    urgencia: "normal",
   },
   {
     id: 2,
-    titulo: "Elétrica automotiva",
+    titulo: "Serviço de elétrica automotiva",
     loja: "Auto Posto Centro",
-    status: "2 propostas recebidas",
-    statusColor: "bg-green-100 text-green-700",
+    status: "2 propostas",
+    statusColor: "bg-green-100 text-green-700 border-green-200",
     tempo: "1 dia atrás",
+    urgencia: "normal",
   },
   {
     id: 3,
-    titulo: "Calibrador de pneus",
-    loja: "Posto Exemplo",
-    status: "Concluído",
-    statusColor: "bg-gray-100 text-gray-600",
-    tempo: "5 dias atrás",
+    titulo: "Inspeção técnica NR-13",
+    loja: "Posto BR Sul",
+    status: "Em andamento",
+    statusColor: "bg-blue-100 text-blue-700 border-blue-200",
+    tempo: "3 dias atrás",
+    urgencia: "alta",
   },
 ];
 
 export default function HomePage() {
   return (
-    <div className="flex flex-col gap-6 max-w-2xl mx-auto">
-      {/* Boas-vindas */}
-      <div>
-        <h1 className="text-2xl font-bold text-[#1A1A2E]">
-          Olá, João
-        </h1>
-        <p className="text-gray-500 text-sm mt-1">O que você precisa hoje?</p>
-      </div>
-
-      {/* Barra de busca */}
-      <div className="flex gap-2">
-        <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Descreva o problema ou serviço que precisa..."
-            className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-white text-sm text-[#2D2D2D] placeholder-gray-400 outline-none focus:border-[#E05C1A] transition-colors"
-          />
+    <div className="max-w-7xl mx-auto space-y-8">
+      {/* Hero Section */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple via-purple-medium to-purple-light p-8 sm:p-12 text-white shadow-2xl shadow-purple/20">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2" />
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl transform -translate-x-1/2 translate-y-1/2" />
         </div>
-        <button className="px-4 py-3 bg-[#E05C1A] hover:bg-[#c54d15] text-white rounded-xl font-semibold text-sm transition-colors flex items-center gap-1.5">
-          <Search className="w-4 h-4" />
-        </button>
+
+        <div className="relative z-10">
+          <div className="flex items-center gap-2 mb-4">
+            <Zap className="w-5 h-5" />
+            <span className="text-sm font-semibold tracking-wide uppercase opacity-90">Dashboard</span>
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-bold mb-3 tracking-tight">
+            Olá, João 👋
+          </h1>
+          <p className="text-lg opacity-90 mb-8 max-w-2xl">
+            O que você precisa resolver hoje? Use a busca inteligente ou acesse rapidamente nossas ferramentas.
+          </p>
+
+          {/* Search Bar */}
+          <div className="relative max-w-2xl">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Descreva o problema ou serviço que você precisa..."
+              className="w-full pl-12 pr-32 py-4 rounded-2xl bg-white text-gray-900 text-base placeholder-gray-400 outline-none focus:ring-4 focus:ring-white/20 transition-all shadow-xl"
+            />
+            <button className="absolute right-2 top-1/2 -translate-y-1/2 px-6 py-2.5 bg-gradient-to-r from-purple to-purple-medium text-white rounded-xl font-semibold text-sm hover:scale-105 transition-transform shadow-lg">
+              Buscar
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Cards de acesso rápido */}
+      {/* Quick Actions */}
       <div>
-        <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-3">
-          Acesso rápido
-        </h2>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-xl font-bold text-gray-900">Acesso Rápido</h2>
+            <p className="text-sm text-gray-600 mt-1">Ferramentas essenciais do Conekta</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {quickActions.map((action) => {
             const Icon = action.icon;
             return (
               <Link
                 key={action.href}
                 href={action.href}
-                className={`${action.bg} ${
-                  action.border ? "border border-gray-100 shadow-sm" : ""
-                } rounded-2xl p-4 flex flex-col gap-2 hover:scale-[1.02] transition-transform active:scale-[0.98]`}
+                className={`group relative overflow-hidden bg-gradient-to-br ${action.bgGradient} rounded-2xl p-6 border border-purple/10 hover:border-purple/30 transition-all hover:scale-[1.02] hover:shadow-xl`}
               >
-                <div
-                  className={`w-9 h-9 rounded-xl flex items-center justify-center ${
-                    action.bg === "bg-[#DC2626]"
-                      ? "bg-white/20"
-                      : "bg-[#E05C1A]/10"
-                  }`}
-                >
-                  <Icon
-                    className={`w-5 h-5 ${
-                      action.bg === "bg-[#DC2626]"
-                        ? "text-white"
-                        : "text-[#E05C1A]"
-                    }`}
-                  />
+                {action.highlight && (
+                  <div className="absolute top-3 right-3">
+                    <span className="flex h-3 w-3">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                    </span>
+                  </div>
+                )}
+
+                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${action.gradient} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg`}>
+                  <Icon className="w-6 h-6 text-white" />
                 </div>
-                <div>
-                  <p className={`text-sm font-bold ${action.textColor}`}>
-                    {action.label}
-                  </p>
-                  <p className={`text-xs mt-0.5 leading-snug ${action.descColor}`}>
-                    {action.desc}
-                  </p>
+
+                <h3 className="text-base font-bold text-gray-900 mb-1">
+                  {action.label}
+                </h3>
+                <p className="text-sm text-gray-600 leading-snug">
+                  {action.desc}
+                </p>
+
+                <div className="mt-4 flex items-center text-purple font-semibold text-sm group-hover:translate-x-1 transition-transform">
+                  Acessar <ChevronRight className="w-4 h-4 ml-1" />
                 </div>
               </Link>
             );
@@ -148,75 +160,172 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Minhas lojas */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wide">
-            Minhas lojas
-          </h2>
-          <button className="text-xs text-[#E05C1A] font-semibold hover:underline">
-            + Adicionar
-          </button>
+      {/* Stats + Lojas */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Stats Cards */}
+        <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-xl bg-purple/10 flex items-center justify-center">
+                <ClipboardList className="w-5 h-5 text-purple" />
+              </div>
+              <span className="text-2xl font-bold text-gray-900">12</span>
+            </div>
+            <p className="text-sm text-gray-600 font-medium">Solicitações ativas</p>
+            <div className="flex items-center gap-1 mt-2 text-xs text-green-600">
+              <TrendingUp className="w-3 h-3" />
+              <span>+3 esta semana</span>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center">
+                <MessageSquare className="w-5 h-5 text-green-600" />
+              </div>
+              <span className="text-2xl font-bold text-gray-900">8</span>
+            </div>
+            <p className="text-sm text-gray-600 font-medium">Propostas recebidas</p>
+            <div className="flex items-center gap-1 mt-2 text-xs text-gray-500">
+              <Clock className="w-3 h-3" />
+              <span>Últimas 48h</span>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
+                <Building2 className="w-5 h-5 text-blue-600" />
+              </div>
+              <span className="text-2xl font-bold text-gray-900">{lojas.length}</span>
+            </div>
+            <p className="text-sm text-gray-600 font-medium">Lojas cadastradas</p>
+            <Link href="/lojas" className="text-xs text-purple font-semibold mt-2 inline-block hover:underline">
+              Gerenciar →
+            </Link>
+          </div>
         </div>
-        <div className="flex gap-3 overflow-x-auto pb-1 -mx-4 px-4 scrollbar-none">
-          {lojas.map((loja) => (
+
+        {/* Featured Loja */}
+        <div className="bg-gradient-to-br from-purple/5 to-purple-light/10 rounded-2xl p-6 border border-purple/20">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Loja Principal</h3>
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+          </div>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple to-purple-medium flex items-center justify-center shadow-lg shadow-purple/20">
+              <Building2 className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <p className="font-bold text-gray-900">{lojas[0].nome}</p>
+              <p className="text-sm text-gray-600">{lojas[0].cidade}</p>
+            </div>
+          </div>
+          <div className="flex gap-4 pt-4 border-t border-purple/10">
+            <div>
+              <p className="text-2xl font-bold text-purple">{lojas[0].solicitacoes}</p>
+              <p className="text-xs text-gray-600">Total</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-green-600">{lojas[0].ativas}</p>
+              <p className="text-xs text-gray-600">Ativas</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Solicitações Recentes */}
+      <div>
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-xl font-bold text-gray-900">Solicitações Recentes</h2>
+            <p className="text-sm text-gray-600 mt-1">Acompanhe o status das suas demandas</p>
+          </div>
+          <Link href="/solicitacoes" className="text-sm text-purple font-semibold hover:underline flex items-center gap-1">
+            Ver todas <ChevronRight className="w-4 h-4" />
+          </Link>
+        </div>
+
+        <div className="space-y-3">
+          {solicitacoes.map((s) => (
             <div
-              key={loja.id}
-              className="flex-shrink-0 bg-white border border-gray-100 rounded-2xl p-4 shadow-sm w-52"
+              key={s.id}
+              className="bg-white rounded-2xl p-5 border border-gray-100 hover:border-purple/30 hover:shadow-lg transition-all group cursor-pointer"
             >
-              <div className="flex items-center gap-2.5 mb-3">
-                <div className="w-9 h-9 rounded-xl bg-[#E05C1A]/10 flex items-center justify-center">
-                  <Building2 className="w-5 h-5 text-[#E05C1A]" />
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-3 mb-2">
+                    <h3 className="text-base font-semibold text-gray-900 group-hover:text-purple transition-colors">
+                      {s.titulo}
+                    </h3>
+                    {s.urgencia === "alta" && (
+                      <span className="flex-shrink-0 px-2 py-0.5 bg-red-100 text-red-700 text-xs font-semibold rounded-full">
+                        Urgente
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-600">{s.loja}</p>
                 </div>
-                <div>
-                  <p className="text-sm font-bold text-[#1A1A2E] leading-tight">
-                    {loja.nome}
-                  </p>
-                  <div className="flex items-center gap-1 mt-0.5">
-                    <MapPin className="w-3 h-3 text-gray-400" />
-                    <p className="text-xs text-gray-500">{loja.cidade}</p>
+
+                <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                  <span className={`px-3 py-1 text-xs font-semibold rounded-full border ${s.statusColor}`}>
+                    {s.status}
+                  </span>
+                  <div className="flex items-center gap-1.5 text-gray-400">
+                    <Clock className="w-3.5 h-3.5" />
+                    <span className="text-xs">{s.tempo}</span>
                   </div>
                 </div>
               </div>
-              <button className="w-full text-xs font-semibold text-[#E05C1A] border border-[#E05C1A] rounded-lg py-1.5 hover:bg-[#E05C1A]/5 transition-colors">
-                Ver solicitações
-              </button>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Solicitações recentes */}
+      {/* Minhas Lojas - Horizontal Scroll */}
       <div>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wide">
-            Solicitações recentes
-          </h2>
-          <Link href="/solicitacoes" className="text-xs text-[#E05C1A] font-semibold hover:underline flex items-center gap-0.5">
-            Ver todas <ChevronRight className="w-3 h-3" />
-          </Link>
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-xl font-bold text-gray-900">Minhas Lojas</h2>
+            <p className="text-sm text-gray-600 mt-1">Gerencie todos os seus estabelecimentos</p>
+          </div>
+          <button className="text-sm text-purple font-semibold hover:underline">
+            + Adicionar Loja
+          </button>
         </div>
-        <div className="flex flex-col gap-2.5">
-          {solicitacoes.map((s) => (
+
+        <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-thin scrollbar-thumb-purple/20 scrollbar-track-transparent">
+          {lojas.map((loja) => (
             <div
-              key={s.id}
-              className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm flex items-center justify-between gap-3"
+              key={loja.id}
+              className="flex-shrink-0 w-72 bg-white rounded-2xl p-6 border border-gray-100 hover:border-purple/30 hover:shadow-lg transition-all group cursor-pointer"
             >
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-[#1A1A2E] truncate">
-                  {s.titulo}
-                </p>
-                <p className="text-xs text-gray-500 mt-0.5">{s.loja}</p>
-              </div>
-              <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
-                <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${s.statusColor}`}>
-                  {s.status}
-                </span>
-                <div className="flex items-center gap-1 text-gray-400">
-                  <Clock className="w-3 h-3" />
-                  <span className="text-[11px]">{s.tempo}</span>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-xl bg-purple/10 flex items-center justify-center group-hover:bg-purple/20 transition-colors">
+                  <Building2 className="w-6 h-6 text-purple" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-bold text-gray-900 group-hover:text-purple transition-colors">
+                    {loja.nome}
+                  </p>
+                  <p className="text-sm text-gray-600">{loja.cidade}</p>
                 </div>
               </div>
+
+              <div className="flex gap-4 pb-4 mb-4 border-b border-gray-100">
+                <div>
+                  <p className="text-xl font-bold text-gray-900">{loja.solicitacoes}</p>
+                  <p className="text-xs text-gray-600">Total</p>
+                </div>
+                <div>
+                  <p className="text-xl font-bold text-purple">{loja.ativas}</p>
+                  <p className="text-xs text-gray-600">Ativas</p>
+                </div>
+              </div>
+
+              <button className="w-full py-2.5 text-sm font-semibold text-purple border border-purple rounded-xl hover:bg-purple hover:text-white transition-all">
+                Ver solicitações
+              </button>
             </div>
           ))}
         </div>

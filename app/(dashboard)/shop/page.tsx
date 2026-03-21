@@ -55,7 +55,7 @@ const banners = [
     subtitulo: "Até 30% OFF em equipamentos",
     // Substituir por imagem real do banner
     imagem: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1200&h=400&fit=crop",
-    cor: "from-[#E05C1A] to-[#c54d15]",
+    cor: "from-purple via-purple-medium to-purple-light",
     cta: "Ver ofertas",
   },
   {
@@ -63,7 +63,7 @@ const banners = [
     titulo: "Parcele em até 12x",
     subtitulo: "Com Conekta Pay sem juros",
     imagem: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200&h=400&fit=crop",
-    cor: "from-purple-600 to-purple-800",
+    cor: "from-purple-medium to-purple",
     cta: "Saiba mais",
   },
   {

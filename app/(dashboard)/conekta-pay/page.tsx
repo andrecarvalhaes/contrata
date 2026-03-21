@@ -60,7 +60,7 @@ export default function ConektaPayPage() {
   return (
     <div className="max-w-6xl mx-auto">
       {/* Hero */}
-      <div className="bg-gradient-to-br from-[#E05C1A] to-[#c54d15] rounded-2xl p-8 sm:p-12 mb-8 shadow-lg">
+      <div className="bg-gradient-to-br from-purple via-purple-medium to-purple-light rounded-2xl p-8 sm:p-12 mb-8 shadow-2xl shadow-purple/20">
         <div className="max-w-3xl">
           <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-4">
             <CreditCard className="w-5 h-5 text-white" />
@@ -70,7 +70,7 @@ export default function ConektaPayPage() {
             Receba com segurança.<br />
             Pague com flexibilidade.
           </h1>
-          <p className="text-lg text-orange-100 leading-relaxed">
+          <p className="text-lg text-purple-100 leading-relaxed">
             A solução de pagamentos integrada do Conekta para serviços de manutenção
           </p>
         </div>
@@ -172,18 +172,22 @@ export default function ConektaPayPage() {
       </div>
 
       {/* CTA final */}
-      <div className="bg-gradient-to-br from-[#1A1A2E] to-[#2D2D3E] rounded-2xl p-8 sm:p-10 shadow-lg">
-        <div className="text-center max-w-2xl mx-auto">
+      <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-8 sm:p-10 shadow-lg relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-purple rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2" />
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-light rounded-full blur-3xl transform -translate-x-1/2 translate-y-1/2" />
+        </div>
+        <div className="text-center max-w-2xl mx-auto relative z-10">
           <h3 className="text-2xl sm:text-3xl font-black text-white mb-3">
             Ative o Conekta Pay na sua conta
           </h3>
           <p className="text-base text-gray-400 leading-relaxed mb-6">
             Gratuito para ativar. Comissão só quando você recebe.
           </p>
-          <button className="w-full sm:w-auto px-8 py-4 bg-[#E05C1A] hover:bg-[#c54d15] text-white font-bold rounded-xl text-base transition-colors shadow-lg">
+          <button className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-purple to-purple-medium hover:from-purple-medium hover:to-purple text-white font-bold rounded-xl text-base transition-all shadow-lg shadow-purple/30 hover:scale-105">
             Ativar Conekta Pay
           </button>
-          <button className="block mx-auto mt-4 text-sm text-gray-500 hover:text-gray-300 transition-colors">
+          <button className="block mx-auto mt-4 text-sm text-gray-400 hover:text-gray-300 transition-colors">
             Saber mais sobre taxas
           </button>
         </div>

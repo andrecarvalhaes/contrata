@@ -122,14 +122,14 @@ export function DashboardSidebar() {
         {/* Header do Sidebar */}
         <div className="flex items-center justify-between p-4 border-b border-gray-100">
           <Link href="/home" className="flex items-center gap-2" onClick={() => setIsOpen(false)}>
-            <div className="w-8 h-8 rounded-lg bg-[#E05C1A] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple via-purple-medium to-purple-light flex items-center justify-center">
               <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
                 <path d="M3 9L9 3L15 9L9 15L3 9Z" fill="white" fillOpacity="0.9" />
                 <circle cx="9" cy="9" r="2.5" fill="white" />
               </svg>
             </div>
-            <span className="text-lg font-bold text-[#1A1A2E] tracking-tight">
-              Nex<span className="text-[#E05C1A]">.to</span>
+            <span className="text-lg font-bold text-gray-900 tracking-tight">
+              cone<span className="text-purple">k</span>ta
             </span>
           </Link>
           <button
@@ -141,16 +141,16 @@ export function DashboardSidebar() {
         </div>
 
         {/* User Info */}
-        <div className="p-4 border-b border-gray-100">
+        <div className="p-4 border-b border-gray-100 bg-gradient-to-br from-purple/5 to-purple-light/5">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-[#E05C1A] flex items-center justify-center text-white text-lg font-bold">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple via-purple-medium to-purple-light flex items-center justify-center text-white text-lg font-bold shadow-lg shadow-purple/20">
               {profile?.name?.[0]?.toUpperCase() || profile?.email?.[0]?.toUpperCase() || 'U'}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-[#1A1A2E] truncate">
+              <p className="text-sm font-bold text-gray-900 truncate">
                 {profile?.name || profile?.email?.split('@')[0] || 'Usuário'}
               </p>
-              <p className="text-xs text-gray-500 truncate">{profile?.email || ''}</p>
+              <p className="text-xs text-gray-600 truncate">{profile?.email || ''}</p>
             </div>
           </div>
         </div>
@@ -196,10 +196,10 @@ export function DashboardSidebar() {
                           onClick={() => setIsOpen(false)}
                           className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${
                             isActive
-                              ? "bg-[#E05C1A] text-white shadow-sm"
+                              ? "bg-gradient-to-r from-purple to-purple-medium text-white shadow-lg shadow-purple/20"
                               : item.highlight
                               ? "bg-red-50 text-[#DC2626] hover:bg-red-100"
-                              : "text-gray-700 hover:bg-gray-50"
+                              : "text-gray-700 hover:bg-purple/5"
                           }`}
                         >
                           <Icon className={`w-5 h-5 flex-shrink-0 ${
