@@ -139,11 +139,11 @@ export function DashboardSidebar() {
         <div className="p-4 border-b border-gray-100 bg-gradient-to-br from-purple/5 to-purple-light/5">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple via-purple-medium to-purple-light flex items-center justify-center text-white text-lg font-bold shadow-lg shadow-purple/20">
-              {profile?.name?.[0]?.toUpperCase() || profile?.email?.[0]?.toUpperCase() || 'U'}
+              {profile?.displayName?.[0]?.toUpperCase() || profile?.email?.[0]?.toUpperCase() || 'U'}
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-bold text-gray-900 truncate">
-                {profile?.name || profile?.email?.split('@')[0] || 'Usuário'}
+                {profile?.displayName || profile?.email?.split('@')[0] || 'Usuário'}
               </p>
               <p className="text-xs text-gray-600 truncate">{profile?.email || ''}</p>
             </div>

@@ -174,7 +174,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 className="flex items-center gap-1.5 sm:gap-2 hover:opacity-80 transition-opacity"
               >
                 <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-purple via-purple-medium to-purple-light flex items-center justify-center text-white text-xs sm:text-sm font-bold shadow-lg shadow-purple/20">
-                  {profile?.name?.[0]?.toUpperCase() || profile?.email?.[0]?.toUpperCase() || 'U'}
+                  {profile?.displayName?.[0]?.toUpperCase() || profile?.email?.[0]?.toUpperCase() || 'U'}
                 </div>
                 <ChevronDown className="w-4 h-4 text-gray-600 hidden sm:block" />
               </button>
@@ -188,7 +188,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                   <div className="absolute top-full right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-20">
                     <div className="px-4 py-3 border-b border-gray-100">
                       <p className="text-sm font-bold text-gray-900 truncate">
-                        {profile?.name || profile?.email?.split('@')[0] || 'Usuário'}
+                        {profile?.displayName || profile?.email?.split('@')[0] || 'Usuário'}
                       </p>
                       <p className="text-xs text-gray-500 truncate">{profile?.email || ''}</p>
                     </div>

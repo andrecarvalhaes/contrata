@@ -33,8 +33,10 @@ export const useAuth = () => {
             setProfile({
               uid: 'fake-user-id',
               email: authData.email,
-              name: authData.name,
+              displayName: authData.name,
+              role: 'posto',
               createdAt: new Date(),
+              updatedAt: new Date(),
             });
             setLoading(false);
             return true;
