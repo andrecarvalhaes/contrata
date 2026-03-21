@@ -62,12 +62,6 @@ const menuSections: MenuSection[] = [
         label: "Conekta Pay",
         desc: "Pagamento seguro",
       },
-      {
-        href: "/shop",
-        icon: ShoppingCart,
-        label: "Shop Conekta",
-        desc: "Marketplace de produtos",
-      },
     ],
   },
   {
@@ -108,16 +102,17 @@ export function DashboardSidebar() {
       {/* Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+          className="fixed inset-0 z-[998] bg-black/50 backdrop-blur-sm"
           onClick={() => setIsOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <div
-        className={`fixed top-0 left-0 bottom-0 z-50 w-[280px] bg-white shadow-2xl transform transition-transform duration-300 ease-out ${
+        className={`fixed top-0 left-0 bottom-0 z-[999] w-[280px] !bg-white opacity-100 shadow-2xl transform transition-transform duration-300 ease-out overflow-hidden ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
+        style={{ backgroundColor: '#ffffff' }}
       >
         {/* Header do Sidebar */}
         <div className="flex items-center justify-between p-4 border-b border-gray-100">
