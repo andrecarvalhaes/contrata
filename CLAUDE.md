@@ -26,6 +26,8 @@ npm run dev              # Runs on http://localhost:3000
 # Production build
 npm run build            # Creates static export for Firebase Hosting
 npm start                # Serves production build locally
+
+# Não há scripts de lint ou test configurados no package.json
 ```
 
 Note: Production builds use static export (`output: "export"`) for Firebase Hosting deployment. Development mode runs without this restriction.

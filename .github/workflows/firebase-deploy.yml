@@ -33,7 +33,7 @@ jobs:
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          projectId: corpcarv
+          projectId: useconekta
           channelId: pr-${{ github.event.number }}
 
   # Deploy produção para push na main
@@ -60,5 +60,5 @@ jobs:
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          projectId: corpcarv
+          projectId: useconekta
           channelId: live

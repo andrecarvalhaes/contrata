@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "site": "corpcarv",
+    "site": "useconekta",
     "public": "out",
     "ignore": [
       "firebase.json",
