@@ -86,8 +86,6 @@ Acesse: http://localhost:3000/pagamento
 ### Pagamentos
 - Tokenização segura de cartões
 - Pagamento com cartão de crédito/débito
-- Pagamento via OXXO (México)
-- Pagamento via SPEI (México)
 - Webhook para notificações de pagamento
 - Registro de transações no Firestore
 
@@ -158,16 +156,6 @@ Acesse: http://localhost:3000/pagamento
 - Processamento instantâneo
 - Tokenização PCI compliant
 - Suporta 3D Secure
-
-### OXXO (México)
-- Gera código de pagamento
-- Válido por 3 dias
-- Confirmação via webhook
-
-### SPEI (México)
-- Transferência bancária
-- Confirmação via webhook
-- Disponível 24/7
 
 ## Testes
 

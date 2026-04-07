@@ -171,7 +171,7 @@ function MyComponent() {
 import { useConekta } from '@/lib/hooks/useConekta';
 
 function PaymentComponent() {
-  const { processCardPayment, generateOxxoPayment, loading } = useConekta();
+  const { processCardPayment, loading } = useConekta();
 
   const handlePayment = async () => {
     try {
@@ -236,14 +236,6 @@ function CheckoutPage() {
 ### 5.1 Cartão de Crédito/Débito
 
 Pagamento instantâneo com tokenização segura.
-
-### 5.2 OXXO (México)
-
-Gera um código de pagamento para pagar em lojas OXXO.
-
-### 5.3 SPEI (México)
-
-Transferência bancária via SPEI.
 
 ## 6. Testando a Integração
 

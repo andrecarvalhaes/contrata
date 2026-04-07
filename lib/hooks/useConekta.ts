@@ -52,7 +52,7 @@ export const useConekta = () => {
     amount: number;
     description: string;
     paymentMethod: {
-      type: 'card' | 'oxxo_cash' | 'spei';
+      type: 'card';
       token_id?: string;
     };
   }) => {
@@ -113,33 +113,11 @@ export const useConekta = () => {
     }
   };
 
-  const generateOxxoPayment = async (amount: number, description: string) => {
-    return await createCharge({
-      amount,
-      description,
-      paymentMethod: {
-        type: 'oxxo_cash'
-      }
-    });
-  };
-
-  const generateSpeiPayment = async (amount: number, description: string) => {
-    return await createCharge({
-      amount,
-      description,
-      paymentMethod: {
-        type: 'spei'
-      }
-    });
-  };
-
   return {
     loading,
     error,
     tokenizeCard,
     createCharge,
-    processCardPayment,
-    generateOxxoPayment,
-    generateSpeiPayment
+    processCardPayment
   };
 };

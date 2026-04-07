@@ -107,7 +107,7 @@ class ConektaClient {
     currency?: string;
     description: string;
     paymentMethod: {
-      type: 'card' | 'oxxo_cash' | 'spei';
+      type: 'card';
       token_id?: string;
     };
   }): Promise<ConektaCharge> {
@@ -117,7 +117,7 @@ class ConektaClient {
         headers: this.getHeaders(),
         body: JSON.stringify({
           amount: data.amount,
-          currency: data.currency || 'MXN',
+          currency: data.currency || 'BRL',
           description: data.description,
           customer_info: {
             customer_id: data.customerId
