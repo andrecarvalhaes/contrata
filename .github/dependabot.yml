@@ -1,0 +1,21 @@
+version: 2
+updates:
+  # npm dependencies — só atualizações de segurança pra não gerar ruído
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    # Ignora atualizações de versão normais, só abre PR quando houver CVE
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-patch"
+          - "version-update:semver-minor"
+          - "version-update:semver-major"
+
+  # GitHub Actions usadas no workflow
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"

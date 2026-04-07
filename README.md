@@ -29,8 +29,28 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+## Deploy
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Deploy automático para Firebase Hosting (projeto `useconekta`) via GitHub Actions a cada push na `main`. Veja [.github/workflows/firebase-deploy.yml](.github/workflows/firebase-deploy.yml).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Pipeline: `quality` (lint + typecheck) → `deploy` (build + firebase deploy).
+
+### Rollback rápido
+
+Se um deploy quebrar produção, volte para a versão anterior em segundos:
+
+**Opção 1 — via CLI (recomendado):**
+
+```bash
+firebase hosting:rollback --project useconekta
+```
+
+**Opção 2 — via console:**
+
+1. Abra https://console.firebase.google.com/project/useconekta/hosting/sites
+2. Clique na aba **Histórico de lançamentos**
+3. Encontre a versão anterior e clique em **Reverter**
+
+O Firebase mantém todas as versões anteriores automaticamente, então você pode voltar sem precisar buildar nada.
+
+Depois do rollback, corrija o bug em uma branch separada, abra um PR e deixe o CI validar antes de re-deployar.

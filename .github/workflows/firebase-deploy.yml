@@ -9,8 +9,30 @@ on:
       - main
 
 jobs:
+  # Quality gates — roda lint + typecheck antes de qualquer deploy
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
   # Preview deploy para Pull Requests
   preview:
+    needs: quality
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
@@ -48,6 +70,7 @@ jobs:
 
   # Deploy produção para push na main
   deploy:
+    needs: quality
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
