@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { signUp, signIn, signInWithGoogle } from '@/lib/firebase/auth';
+import { signUp, signIn, signInWithGoogle } from '@/lib/supabase/auth';
 
 interface AuthFormProps {
   mode?: 'login' | 'signup';

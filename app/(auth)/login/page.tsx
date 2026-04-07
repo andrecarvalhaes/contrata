@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Eye, EyeOff } from "lucide-react";
 import { useAuthContext } from "@/components/providers/AuthProvider";
+import { signIn, signInWithGoogle } from "@/lib/supabase/auth";
 
 const loginSchema = z.object({
   email: z
@@ -21,25 +22,10 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
-function saveFakeAuthSession(email: string) {
-  localStorage.setItem(
-    "fakeAuth",
-    JSON.stringify({
-      email,
-      name: email.split("@")[0],
-      loggedIn: true,
-      timestamp: Date.now(),
-    })
-  );
-}
-
-function redirectToHome() {
-  window.location.href = "/home";
-}
-
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
   const router = useRouter();
   const { isAuthenticated, loading: authLoading } = useAuthContext();
 
@@ -59,17 +45,24 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
+    setAuthError(null);
+    try {
+      await signIn(data.email, data.password);
+      router.replace("/home");
+    } catch (err: any) {
+      setAuthError(err?.message || "Não foi possível entrar. Verifique seus dados.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    // Login fake para testes (aceita qualquer email/senha)
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    saveFakeAuthSession(data.email);
-
-    console.log("Login fake realizado:", data.email);
-    setIsLoading(false);
-
-    // Redireciona para o dashboard com reload completo para atualizar o AuthProvider
-    redirectToHome();
+  const handleGoogle = async () => {
+    setAuthError(null);
+    try {
+      await signInWithGoogle();
+    } catch (err: any) {
+      setAuthError(err?.message || "Erro ao entrar com Google.");
+    }
   };
 
   return (
@@ -84,6 +77,12 @@ export default function LoginPage() {
             Entre na sua conta para continuar
           </p>
         </div>
+
+        {authError && (
+          <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-sm text-red-600">
+            {authError}
+          </div>
+        )}
 
         {/* Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
@@ -204,7 +203,8 @@ export default function LoginPage() {
 
         {/* Google Button */}
         <button
-          onClick={() => console.log("Google login")}
+          type="button"
+          onClick={handleGoogle}
           className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">

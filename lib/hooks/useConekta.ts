@@ -71,7 +71,7 @@ export const useConekta = () => {
         },
         body: JSON.stringify({
           ...data,
-          firebaseUid: user.uid
+          userId: user.id
         })
       });
 

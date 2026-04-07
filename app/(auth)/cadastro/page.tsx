@@ -11,6 +11,8 @@ import StepIndicator from "@/components/auth/StepIndicator";
 import CNPJInput, { CNPJData } from "@/components/auth/CNPJInput";
 import GoogleButton from "@/components/auth/GoogleButton";
 import { useAuthContext } from "@/components/providers/AuthProvider";
+import { signUp, signInWithGoogle } from "@/lib/supabase/auth";
+import { supabase } from "@/lib/supabase/client";
 
 // ─── Schemas ─────────────────────────────────────────────────────────────────
 
@@ -74,6 +76,7 @@ export default function CadastroPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [termsError, setTermsError] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
@@ -162,11 +165,65 @@ export default function CadastroPage() {
       setTermsError(true);
       return;
     }
+    if (!step1Data) return;
     setTermsError(false);
+    setSubmitError(null);
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    setIsLoading(false);
-    setIsSuccess(true);
+    try {
+      const { user } = await signUp(
+        step1Data.email,
+        step1Data.senha,
+        step1Data.nome,
+        "posto"
+      );
+
+      // Cria um posto + lojas para o usuário recém criado
+      if (user && lojas.length > 0) {
+        const { data: postoRow, error: postoErr } = await supabase
+          .from("postos")
+          .insert({
+            user_id: user.id,
+            razao_social: lojas[0].razao_social,
+            nome_fantasia: lojas[0].nome_fantasia,
+            cnpj: lojas[0].cnpj.replace(/\D/g, ""),
+            telefone: step1Data.telefone,
+          })
+          .select("id")
+          .single();
+
+        if (postoErr) throw new Error(postoErr.message);
+
+        if (postoRow) {
+          const lojasInsert = lojas.map((l) => ({
+            posto_id: postoRow.id,
+            nome: l.nome_fantasia,
+            endereco: `${l.logradouro}, ${l.numero} - ${l.bairro}`,
+            cidade: l.municipio,
+            estado: l.uf,
+            cep: l.cep,
+          }));
+          const { error: lojasErr } = await supabase
+            .from("posto_lojas")
+            .insert(lojasInsert);
+          if (lojasErr) throw new Error(lojasErr.message);
+        }
+      }
+
+      setIsSuccess(true);
+    } catch (err: any) {
+      setSubmitError(err?.message || "Erro ao criar conta. Tente novamente.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSignup = async () => {
+    setSubmitError(null);
+    try {
+      await signInWithGoogle();
+    } catch (err: any) {
+      setSubmitError(err?.message || "Erro ao cadastrar com Google.");
+    }
   };
 
   // ── Success Screen ─────────────────────────────────────────────────────────
@@ -223,7 +280,7 @@ export default function CadastroPage() {
         {currentStep === 0 && (
           <form onSubmit={handleStep1} className="flex flex-col gap-4">
             {/* Google Button */}
-            <GoogleButton label="Cadastrar com Google" />
+            <GoogleButton label="Cadastrar com Google" onClick={handleGoogleSignup} />
             <div className="flex items-center gap-3">
               <div className="flex-1 h-px bg-gray-100" />
               <span className="text-xs text-gray-400 font-medium">ou preencha abaixo</span>
@@ -709,6 +766,11 @@ export default function CadastroPage() {
               <p className="text-xs text-red-500 -mt-3">
                 Você precisa aceitar os termos para criar sua conta
               </p>
+            )}
+            {submitError && (
+              <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-sm text-red-600">
+                {submitError}
+              </div>
             )}
 
             {/* Navigation */}
