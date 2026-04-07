@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Mail, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { resetPassword } from "@/lib/supabase/auth";
 
 const recoverSchema = z.object({
   email: z
@@ -19,6 +20,7 @@ type RecoverFormData = z.infer<typeof recoverSchema>;
 export default function RecuperarSenhaPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const {
     register,
@@ -30,11 +32,15 @@ export default function RecuperarSenhaPage() {
 
   const onSubmit = async (data: RecoverFormData) => {
     setIsLoading(true);
-    // Simula envio
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    console.log("Recover email:", data.email);
-    setIsLoading(false);
-    setSubmitted(true);
+    setErrorMsg(null);
+    try {
+      await resetPassword(data.email);
+      setSubmitted(true);
+    } catch (err: any) {
+      setErrorMsg(err?.message || "Erro ao enviar e-mail de recuperação.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -74,6 +80,9 @@ export default function RecuperarSenhaPage() {
                 />
                 {errors.email && (
                   <p className="text-xs text-red-500">{errors.email.message}</p>
+                )}
+                {errorMsg && (
+                  <p className="text-xs text-red-500">{errorMsg}</p>
                 )}
               </div>
 

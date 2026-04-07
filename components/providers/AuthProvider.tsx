@@ -1,9 +1,9 @@
 'use client';
 
 import { createContext, useContext, ReactNode } from 'react';
-import { User } from 'firebase/auth';
+import type { User } from '@supabase/supabase-js';
 import { useAuth } from '@/lib/hooks/useAuth';
-import { UserProfile } from '@/lib/firebase/auth';
+import type { UserProfile } from '@/lib/supabase/auth';
 
 interface AuthContextType {
   user: User | null;
