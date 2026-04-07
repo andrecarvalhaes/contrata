@@ -29,7 +29,10 @@ export function getSupabase(): SupabaseClient<Database> {
       auth: {
         persistSession: true,
         autoRefreshToken: true,
-        detectSessionInUrl: true,
+        // detectSessionInUrl fica DESLIGADO porque a página /auth/callback
+        // chama exchangeCodeForSession manualmente. Se ambos tentarem consumir
+        // o code verifier, o segundo falha com "PKCE code verifier not found".
+        detectSessionInUrl: false,
         flowType: 'pkce',
         storage: typeof window !== 'undefined' ? window.localStorage : undefined,
       },
