@@ -204,7 +204,7 @@ export default function SOSLandingPage() {
                   ))}
                 </div>
                 <p className="text-gray-700 leading-relaxed mb-4 text-lg">
-                  "{testimonial.comment}"
+                  &ldquo;{testimonial.comment}&rdquo;
                 </p>
                 <div>
                   <p className="font-bold text-gray-900">{testimonial.name}</p>

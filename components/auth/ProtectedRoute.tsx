@@ -22,7 +22,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-[#E05C1A] border-t-transparent rounded-full animate-spin mx-auto" />
+          <div className="w-12 h-12 border-4 border-purple border-t-transparent rounded-full animate-spin mx-auto" />
           <p className="mt-4 text-sm text-gray-600">Carregando...</p>
         </div>
       </div>

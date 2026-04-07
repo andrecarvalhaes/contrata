@@ -21,6 +21,22 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
+function saveFakeAuthSession(email: string) {
+  localStorage.setItem(
+    "fakeAuth",
+    JSON.stringify({
+      email,
+      name: email.split("@")[0],
+      loggedIn: true,
+      timestamp: Date.now(),
+    })
+  );
+}
+
+function redirectToHome() {
+  window.location.href = "/home";
+}
+
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -47,19 +63,13 @@ export default function LoginPage() {
     // Login fake para testes (aceita qualquer email/senha)
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    // Salva sessão fake no localStorage
-    localStorage.setItem('fakeAuth', JSON.stringify({
-      email: data.email,
-      name: data.email.split('@')[0],
-      loggedIn: true,
-      timestamp: Date.now()
-    }));
+    saveFakeAuthSession(data.email);
 
     console.log("Login fake realizado:", data.email);
     setIsLoading(false);
 
     // Redireciona para o dashboard com reload completo para atualizar o AuthProvider
-    window.location.href = "/home";
+    redirectToHome();
   };
 
   return (

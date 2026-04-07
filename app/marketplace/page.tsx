@@ -5,7 +5,7 @@ import { Footer } from '@/components/Footer'
 import { MarketplaceHeader } from '@/components/marketplace/MarketplaceHeader'
 import { MarketplaceFilters } from '@/components/marketplace/MarketplaceFilters'
 import { ProviderCard } from '@/components/marketplace/ProviderCard'
-import { useState, useEffect, Suspense } from 'react'
+import { useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Filter, X } from 'lucide-react'
 
@@ -105,18 +105,20 @@ const mockProviders = [
 
 function MarketplaceContent() {
   const searchParams = useSearchParams()
+  const searchFromUrl = searchParams?.get('search') ?? ''
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
-  const [searchQuery, setSearchQuery] = useState<string>('')
+  const [searchQuery, setSearchQuery] = useState<string>(searchFromUrl)
   const [sortBy, setSortBy] = useState<string>('relevance')
   const [isFilterOpen, setIsFilterOpen] = useState(false)
 
-  // Pega o parâmetro de busca da URL (vindo da home)
-  useEffect(() => {
-    const searchFromUrl = searchParams?.get('search')
+  // Sincroniza mudanças do parâmetro da URL sem setState em effect
+  const [prevSearchFromUrl, setPrevSearchFromUrl] = useState(searchFromUrl)
+  if (searchFromUrl !== prevSearchFromUrl) {
+    setPrevSearchFromUrl(searchFromUrl)
     if (searchFromUrl) {
       setSearchQuery(searchFromUrl)
     }
-  }, [searchParams])
+  }
 
   const handleSearch = () => {
     // Lógica de busca

@@ -49,43 +49,52 @@ declare global {
 export function useSpeechRecognition() {
   const [isListening, setIsListening] = useState(false)
   const [transcript, setTranscript] = useState('')
-  const [isSupported, setIsSupported] = useState(false)
-  const [recognition, setRecognition] = useState<SpeechRecognitionInstance | null>(null)
+
+  const [recognition] = useState<SpeechRecognitionInstance | null>(() => {
+    if (typeof window === 'undefined') return null
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SR) return null
+    const instance = new SR() as SpeechRecognitionInstance
+    instance.continuous = false
+    instance.interimResults = true
+    instance.lang = 'pt-BR'
+    return instance
+  })
+
+  const isSupported = recognition !== null
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
-      if (SpeechRecognition) {
-        setIsSupported(true)
-        const recognitionInstance = new SpeechRecognition() as SpeechRecognitionInstance
-        recognitionInstance.continuous = false
-        recognitionInstance.interimResults = true
-        recognitionInstance.lang = 'pt-BR'
+    if (!recognition) return
 
-        recognitionInstance.addEventListener('result', (event: Event) => {
-          const e = event as SpeechRecognitionEvent
-          const transcript = Array.from(e.results)
-            .map(result => result[0])
-            .map(result => result.transcript)
-            .join('')
-
-          setTranscript(transcript)
-        })
-
-        recognitionInstance.addEventListener('end', () => {
-          setIsListening(false)
-        })
-
-        recognitionInstance.addEventListener('error', (event: Event) => {
-          const e = event as SpeechRecognitionErrorEvent
-          console.error('Speech recognition error:', e.error)
-          setIsListening(false)
-        })
-
-        setRecognition(recognitionInstance)
-      }
+    const handleResult = (event: Event) => {
+      const e = event as SpeechRecognitionEvent
+      const text = Array.from(e.results)
+        .map(result => result[0])
+        .map(result => result.transcript)
+        .join('')
+      setTranscript(text)
     }
-  }, [])
+
+    const handleEnd = () => {
+      setIsListening(false)
+    }
+
+    const handleError = (event: Event) => {
+      const e = event as SpeechRecognitionErrorEvent
+      console.error('Speech recognition error:', e.error)
+      setIsListening(false)
+    }
+
+    recognition.addEventListener('result', handleResult)
+    recognition.addEventListener('end', handleEnd)
+    recognition.addEventListener('error', handleError)
+
+    return () => {
+      recognition.removeEventListener('result', handleResult)
+      recognition.removeEventListener('end', handleEnd)
+      recognition.removeEventListener('error', handleError)
+    }
+  }, [recognition])
 
   const startListening = useCallback(() => {
     if (recognition && !isListening) {

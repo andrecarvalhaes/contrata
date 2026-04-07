@@ -43,6 +43,15 @@ export function Hero() {
   const { isListening, transcript, isSupported, startListening, stopListening } = useSpeechRecognition()
   const router = useRouter()
 
+  // Sincroniza transcrição de voz no input sem usar setState em effect
+  const [prevTranscript, setPrevTranscript] = useState('')
+  if (transcript !== prevTranscript) {
+    setPrevTranscript(transcript)
+    if (transcript) {
+      setSearchValue(transcript)
+    }
+  }
+
   const fillSearch = (text: string) => {
     setSearchValue(text)
   }
@@ -77,12 +86,6 @@ export function Hero() {
       handleSearch()
     }
   }
-
-  useEffect(() => {
-    if (transcript) {
-      setSearchValue(transcript)
-    }
-  }, [transcript])
 
   const textLoopVariants: Variants = {
     initial: { y: 30, opacity: 0, filter: 'blur(10px)' },

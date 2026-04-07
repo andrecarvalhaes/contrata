@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Search,
@@ -126,30 +126,20 @@ export function ServiceSearchBar({
     services = allServices,
     onModeChange,
 }: ServiceSearchBarProps) {
-    const [result, setResult] = useState<ServiceAction[] | null>(null);
     const [isFocused, setIsFocused] = useState(false);
     const [selectedService, setSelectedService] = useState<ServiceAction | null>(null);
     const [searchMode, setSearchMode] = useState<'problem' | 'service'>('service');
     const debouncedQuery = useDebounce(value, 150);
 
-    useEffect(() => {
-        if (!isFocused) {
-            setResult(null);
-            return;
-        }
-
-        if (!debouncedQuery) {
-            setResult(allServices);
-            return;
-        }
+    const result = useMemo<ServiceAction[] | null>(() => {
+        if (!isFocused) return null;
+        if (!debouncedQuery) return allServices;
 
         const normalizedQuery = debouncedQuery.toLowerCase().trim();
-        const filteredServices = allServices.filter((service) => {
+        return allServices.filter((service) => {
             const searchableText = `${service.label} ${service.category}`.toLowerCase();
             return searchableText.includes(normalizedQuery);
         });
-
-        setResult(filteredServices);
     }, [debouncedQuery, isFocused]);
 
     const container = {
