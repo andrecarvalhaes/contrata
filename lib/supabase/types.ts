@@ -235,6 +235,7 @@ export type Database = {
         Row: {
           ativo: boolean
           cep: string | null
+          certificacoes: string[]
           cidade: string | null
           cnpj: string | null
           created_at: string
@@ -243,13 +244,16 @@ export type Database = {
           endereco: string | null
           estado: string | null
           id: string
+          imagem_url: string | null
           latitude: number | null
           longitude: number | null
           nome_fantasia: string | null
+          preco_inicial_centavos: number | null
           raio_atendimento_km: number | null
           rating_medio: number
           razao_social: string
           telefone: string | null
+          tempo_resposta_horas: number | null
           total_avaliacoes: number
           updated_at: string
           user_id: string
@@ -260,6 +264,7 @@ export type Database = {
         Insert: {
           ativo?: boolean
           cep?: string | null
+          certificacoes?: string[]
           cidade?: string | null
           cnpj?: string | null
           created_at?: string
@@ -268,13 +273,16 @@ export type Database = {
           endereco?: string | null
           estado?: string | null
           id?: string
+          imagem_url?: string | null
           latitude?: number | null
           longitude?: number | null
           nome_fantasia?: string | null
+          preco_inicial_centavos?: number | null
           raio_atendimento_km?: number | null
           rating_medio?: number
           razao_social: string
           telefone?: string | null
+          tempo_resposta_horas?: number | null
           total_avaliacoes?: number
           updated_at?: string
           user_id: string
@@ -285,6 +293,7 @@ export type Database = {
         Update: {
           ativo?: boolean
           cep?: string | null
+          certificacoes?: string[]
           cidade?: string | null
           cnpj?: string | null
           created_at?: string
@@ -293,13 +302,16 @@ export type Database = {
           endereco?: string | null
           estado?: string | null
           id?: string
+          imagem_url?: string | null
           latitude?: number | null
           longitude?: number | null
           nome_fantasia?: string | null
+          preco_inicial_centavos?: number | null
           raio_atendimento_km?: number | null
           rating_medio?: number
           razao_social?: string
           telefone?: string | null
+          tempo_resposta_horas?: number | null
           total_avaliacoes?: number
           updated_at?: string
           user_id?: string
@@ -703,7 +715,21 @@ export type Database = {
         Relationships: []
       }
     }
-    Views: { [_ in never]: never }
+    Views: {
+      v_categorias_com_contagem: {
+        Row: {
+          id: string | null
+          slug: string | null
+          nome: string | null
+          descricao: string | null
+          icone: string | null
+          ordem: number | null
+          ativa: boolean | null
+          fornecedores_count: number | null
+        }
+        Relationships: []
+      }
+    }
     Functions: {
       current_fornecedor_ids: { Args: never; Returns: string[] }
       current_posto_ids: { Args: never; Returns: string[] }

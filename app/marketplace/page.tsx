@@ -8,100 +8,7 @@ import { ProviderCard } from '@/components/marketplace/ProviderCard'
 import { useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Filter, X } from 'lucide-react'
-
-// Mock data de fornecedores - substituir por API real
-const mockProviders = [
-  {
-    id: 1,
-    name: 'TechPetro Manutenção',
-    category: 'Manutenção de Bombas',
-    rating: 4.8,
-    reviews: 127,
-    location: 'São Paulo, SP',
-    distance: '2.5 km',
-    image: '/placeholder-provider.jpg',
-    verified: true,
-    certifications: ['NR-13', 'ISO 9001'],
-    description: 'Especialista em manutenção preventiva e corretiva de bombas de combustível',
-    responseTime: '2h',
-    startingPrice: 350,
-  },
-  {
-    id: 2,
-    name: 'Posto Service Pro',
-    category: 'Limpeza de Tanques',
-    rating: 4.9,
-    reviews: 203,
-    location: 'São Paulo, SP',
-    distance: '3.8 km',
-    image: '/placeholder-provider.jpg',
-    verified: true,
-    certifications: ['NR-13', 'ISO 14001'],
-    description: 'Limpeza e inspeção de tanques subterrâneos com tecnologia avançada',
-    responseTime: '1h',
-    startingPrice: 1200,
-  },
-  {
-    id: 3,
-    name: 'Elétrica Industrial Santos',
-    category: 'Elétrica',
-    rating: 4.7,
-    reviews: 89,
-    location: 'Santos, SP',
-    distance: '5.2 km',
-    image: '/placeholder-provider.jpg',
-    verified: true,
-    certifications: ['NR-10', 'NR-12'],
-    description: 'Instalações e manutenção elétrica para postos de combustível',
-    responseTime: '3h',
-    startingPrice: 280,
-  },
-  {
-    id: 4,
-    name: 'Hidráulica Express',
-    category: 'Hidráulica',
-    rating: 4.6,
-    reviews: 156,
-    location: 'São Paulo, SP',
-    distance: '4.1 km',
-    image: '/placeholder-provider.jpg',
-    verified: false,
-    certifications: ['NR-12'],
-    description: 'Serviços hidráulicos especializados para postos e distribuidoras',
-    responseTime: '4h',
-    startingPrice: 220,
-  },
-  {
-    id: 5,
-    name: 'AutoPosto Soluções',
-    category: 'Manutenção de Bombas',
-    rating: 4.9,
-    reviews: 312,
-    location: 'São Paulo, SP',
-    distance: '1.8 km',
-    image: '/placeholder-provider.jpg',
-    verified: true,
-    certifications: ['NR-13', 'ISO 9001', 'ISO 14001'],
-    description: 'Mais de 15 anos de experiência em manutenção completa de postos',
-    responseTime: '1h',
-    startingPrice: 400,
-  },
-  {
-    id: 6,
-    name: 'Ambiental Tech',
-    category: 'Análise Ambiental',
-    rating: 4.8,
-    reviews: 178,
-    location: 'São Paulo, SP',
-    distance: '6.5 km',
-    image: '/placeholder-provider.jpg',
-    verified: true,
-    certifications: ['ISO 14001', 'CETESB'],
-    description: 'Análises ambientais e estudos de impacto para postos de combustível',
-    responseTime: '24h',
-    startingPrice: 850,
-  },
-]
+import { useFornecedores } from '@/lib/data/queries'
 
 function MarketplaceContent() {
   const searchParams = useSearchParams()
@@ -120,9 +27,13 @@ function MarketplaceContent() {
     }
   }
 
+  const { data: fornecedores, isLoading, error } = useFornecedores({
+    search: searchQuery || undefined,
+    categoriaSlug: selectedCategory,
+  })
+
   const handleSearch = () => {
-    // Lógica de busca
-    console.log('Buscando:', searchQuery)
+    // a query do useFornecedores já reage ao searchQuery
   }
 
   return (
@@ -162,7 +73,7 @@ function MarketplaceContent() {
                   </button>
 
                   <div className="text-sm sm:text-base text-gray-600">
-                    <span className="font-semibold text-gray-900">{mockProviders.length}</span> <span className="hidden sm:inline">fornecedores encontrados</span><span className="sm:hidden">encontrados</span>
+                    <span className="font-semibold text-gray-900">{fornecedores?.length ?? 0}</span> <span className="hidden sm:inline">fornecedores encontrados</span><span className="sm:hidden">encontrados</span>
                   </div>
                 </div>
 
@@ -182,11 +93,33 @@ function MarketplaceContent() {
               </div>
 
               {/* Grid de Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
-                {mockProviders.map((provider) => (
-                  <ProviderCard key={provider.id} provider={provider} />
-                ))}
-              </div>
+              {isLoading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="bg-white border border-gray-200 rounded-xl h-[400px] animate-pulse"
+                    />
+                  ))}
+                </div>
+              ) : error ? (
+                <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-sm text-red-600">
+                  Erro ao carregar fornecedores: {(error as Error).message}
+                </div>
+              ) : !fornecedores || fornecedores.length === 0 ? (
+                <div className="bg-white border border-gray-200 rounded-xl p-10 text-center">
+                  <p className="text-gray-600 font-medium mb-1">Nenhum fornecedor encontrado</p>
+                  <p className="text-sm text-gray-500">
+                    Seja o primeiro a cadastrar sua empresa no Conekta.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+                  {fornecedores.map((provider) => (
+                    <ProviderCard key={provider.id} provider={provider} />
+                  ))}
+                </div>
+              )}
 
               {/* Paginação */}
               <div className="mt-8 sm:mt-12 flex justify-center items-center gap-1 sm:gap-2">

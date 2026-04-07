@@ -1,7 +1,7 @@
 'use client'
 
-import { Star, Award, MapPin, Clock, DollarSign } from 'lucide-react'
-import { categories } from '@/lib/data/services'
+import { Star, Award, MapPin, Clock, DollarSign, Search } from 'lucide-react'
+import { useCategorias } from '@/lib/data/queries'
 import { CategoryIcon } from './CategoryIcon'
 
 interface MarketplaceFiltersProps {
@@ -18,6 +18,7 @@ const certifications = [
 ]
 
 export function MarketplaceFilters({ selectedCategory, setSelectedCategory }: MarketplaceFiltersProps) {
+  const { data: categorias, isLoading } = useCategorias()
   return (
     <div className="lg:sticky lg:top-24 space-y-4 lg:space-y-6">
       {/* Categorias */}
@@ -27,23 +28,39 @@ export function MarketplaceFilters({ selectedCategory, setSelectedCategory }: Ma
           Categorias
         </h3>
         <div className="space-y-2">
-          {categories.map((category) => (
+          <button
+            onClick={() => setSelectedCategory('all')}
+            className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm transition-all ${
+              selectedCategory === 'all'
+                ? 'bg-purple/10 text-purple font-medium'
+                : 'text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            <CategoryIcon iconName="Search" className={selectedCategory === 'all' ? 'w-4 h-4 text-purple' : 'w-4 h-4 text-gray-500'} />
+            <span>Todas as categorias</span>
+          </button>
+
+          {isLoading && (
+            <div className="text-xs text-gray-400 px-3 py-2">Carregando categorias...</div>
+          )}
+
+          {categorias?.map((categoria) => (
             <button
-              key={category.id}
-              onClick={() => setSelectedCategory(category.id)}
+              key={categoria.id}
+              onClick={() => setSelectedCategory(categoria.slug)}
               className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm transition-all ${
-                selectedCategory === category.id
+                selectedCategory === categoria.slug
                   ? 'bg-purple/10 text-purple font-medium'
                   : 'text-gray-700 hover:bg-gray-50'
               }`}
             >
               <CategoryIcon
-                iconName={category.iconName}
-                className={selectedCategory === category.id ? 'w-4 h-4 text-purple' : 'w-4 h-4 text-gray-500'}
+                iconName={categoria.icone || 'Wrench'}
+                className={selectedCategory === categoria.slug ? 'w-4 h-4 text-purple' : 'w-4 h-4 text-gray-500'}
               />
-              <span>{category.name}</span>
-              <span className={`ml-auto text-xs ${selectedCategory === category.id ? 'text-purple' : 'text-gray-400'}`}>
-                {category.count}
+              <span>{categoria.nome}</span>
+              <span className={`ml-auto text-xs ${selectedCategory === categoria.slug ? 'text-purple' : 'text-gray-400'}`}>
+                {categoria.fornecedores_count}
               </span>
             </button>
           ))}
