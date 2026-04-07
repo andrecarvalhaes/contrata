@@ -18,9 +18,8 @@ export default function ConektaPaymentForm({
   onError
 }: PaymentFormProps) {
   const { isAuthenticated } = useAuthContext();
-  const { processCardPayment, generateOxxoPayment, generateSpeiPayment, loading, error } = useConekta();
+  const { processCardPayment, loading, error } = useConekta();
 
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'oxxo' | 'spei'>('card');
   const [cardData, setCardData] = useState({
     number: '',
     name: '',
@@ -38,16 +37,7 @@ export default function ConektaPaymentForm({
     }
 
     try {
-      let charge;
-
-      if (paymentMethod === 'card') {
-        charge = await processCardPayment(cardData, amount, description);
-      } else if (paymentMethod === 'oxxo') {
-        charge = await generateOxxoPayment(amount, description);
-      } else {
-        charge = await generateSpeiPayment(amount, description);
-      }
-
+      const charge = await processCardPayment(cardData, amount, description);
       onSuccess?.(charge);
     } catch (err: any) {
       onError?.(err.message);
@@ -63,50 +53,8 @@ export default function ConektaPaymentForm({
         <p className="text-gray-600">{description}</p>
       </div>
 
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Método de Pagamento
-        </label>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => setPaymentMethod('card')}
-            className={`flex-1 py-2 px-4 rounded ${
-              paymentMethod === 'card'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-200 text-gray-700'
-            }`}
-          >
-            Cartão
-          </button>
-          <button
-            type="button"
-            onClick={() => setPaymentMethod('oxxo')}
-            className={`flex-1 py-2 px-4 rounded ${
-              paymentMethod === 'oxxo'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-200 text-gray-700'
-            }`}
-          >
-            OXXO
-          </button>
-          <button
-            type="button"
-            onClick={() => setPaymentMethod('spei')}
-            className={`flex-1 py-2 px-4 rounded ${
-              paymentMethod === 'spei'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-200 text-gray-700'
-            }`}
-          >
-            SPEI
-          </button>
-        </div>
-      </div>
-
       <form onSubmit={handleSubmit}>
-        {paymentMethod === 'card' && (
-          <div className="space-y-4">
+        <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Número do Cartão
@@ -179,24 +127,7 @@ export default function ConektaPaymentForm({
                 />
               </div>
             </div>
-          </div>
-        )}
-
-        {paymentMethod === 'oxxo' && (
-          <div className="text-center py-4">
-            <p className="text-gray-600">
-              Você receberá um código de pagamento para pagar em qualquer loja OXXO.
-            </p>
-          </div>
-        )}
-
-        {paymentMethod === 'spei' && (
-          <div className="text-center py-4">
-            <p className="text-gray-600">
-              Você receberá as instruções para realizar uma transferência bancária via SPEI.
-            </p>
-          </div>
-        )}
+        </div>
 
         {error && (
           <div className="mt-4 p-3 bg-red-100 text-red-700 rounded">

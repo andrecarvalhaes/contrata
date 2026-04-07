@@ -67,7 +67,7 @@ Access auth state via `useAuthContext()` from any component.
 Conekta integration via `lib/conekta/client.ts`:
 
 - Creates/manages customers linked to Firebase users
-- Supports card, OXXO cash, and SPEI payments
+- Suporta pagamentos via cartão (projeto opera no Brasil)
 - Customer IDs stored in user profiles (`conektaCustomerId`)
 - Uses server-side private key for API calls
 

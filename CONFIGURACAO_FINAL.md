@@ -103,8 +103,6 @@ Para ativar pagamentos reais:
 ### Conekta Payment
 - ✅ Tokenização de cartões
 - ✅ Pagamento com cartão
-- ✅ Pagamento via OXXO
-- ✅ Pagamento via SPEI
 - ✅ Webhook para notificações
 - ✅ Hook customizado useConekta()
 - ✅ Integração automática com Firebase UID
