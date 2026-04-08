@@ -1,4 +1,39 @@
-import { CreditCard, Zap, FileText, Lock, Wrench, CheckCircle, DollarSign, Shield, Users } from "lucide-react";
+"use client";
+
+import { CreditCard, Zap, FileText, Lock, Wrench, CheckCircle, DollarSign, Shield, Users, Receipt } from "lucide-react";
+import { useMinhasTransacoes, type PayStatus, type PayMetodo } from "@/lib/data/queries";
+
+const STATUS_LABEL: Record<PayStatus, { label: string; color: string }> = {
+  pendente: { label: "Pendente", color: "bg-amber-100 text-amber-700 border-amber-200" },
+  autorizada: { label: "Autorizada", color: "bg-blue-100 text-blue-700 border-blue-200" },
+  capturada: { label: "Capturada", color: "bg-blue-100 text-blue-700 border-blue-200" },
+  em_garantia: { label: "Em custódia (Lock)", color: "bg-purple-100 text-purple-700 border-purple-200" },
+  liberada: { label: "Liberada", color: "bg-green-100 text-green-700 border-green-200" },
+  reembolsada: { label: "Reembolsada", color: "bg-gray-100 text-gray-600 border-gray-200" },
+  falhou: { label: "Falhou", color: "bg-red-100 text-red-700 border-red-200" },
+  cancelada: { label: "Cancelada", color: "bg-gray-100 text-gray-600 border-gray-200" },
+};
+
+const METODO_LABEL: Record<PayMetodo, string> = {
+  cartao: "Cartão",
+  pix: "Pix",
+  boleto: "Boleto",
+};
+
+function formatMoeda(centavos: number, moeda = "BRL"): string {
+  return (centavos / 100).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: moeda,
+  });
+}
+
+function formatData(iso: string): string {
+  return new Date(iso).toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+}
 
 const beneficios = [
   {
@@ -57,6 +92,8 @@ const lockSteps = [
 ];
 
 export default function ConektaPayPage() {
+  const { data: transacoes, isLoading: loadingTransacoes, error: errorTransacoes } = useMinhasTransacoes();
+
   return (
     <div className="max-w-6xl mx-auto">
       {/* Hero */}
@@ -169,6 +206,91 @@ export default function ConektaPayPage() {
             </p>
           </div>
         </div>
+      </div>
+
+      {/* Minhas transações */}
+      <div className="mb-10">
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide flex items-center gap-2">
+            <Receipt className="w-4 h-4" />
+            Minhas transações
+          </h2>
+          {transacoes && transacoes.length > 0 && (
+            <span className="text-xs text-gray-400">
+              {transacoes.length} {transacoes.length === 1 ? "transação" : "transações"}
+            </span>
+          )}
+        </div>
+
+        {loadingTransacoes ? (
+          <div className="bg-white border border-gray-100 rounded-2xl">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="h-16 border-b border-gray-100 last:border-0 animate-pulse" />
+            ))}
+          </div>
+        ) : errorTransacoes ? (
+          <div className="bg-red-50 border border-red-200 rounded-2xl p-6 text-sm text-red-600">
+            Erro ao carregar transações: {(errorTransacoes as Error).message}
+          </div>
+        ) : !transacoes || transacoes.length === 0 ? (
+          <div className="bg-white border border-gray-100 rounded-2xl p-10 text-center">
+            <div className="w-14 h-14 bg-purple/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Receipt className="w-7 h-7 text-purple" />
+            </div>
+            <h3 className="text-base font-bold text-gray-900 mb-1">Nenhuma transação ainda</h3>
+            <p className="text-sm text-gray-500">
+              Quando você fizer ou receber um pagamento pelo Conekta Pay, ele aparecerá aqui.
+            </p>
+          </div>
+        ) : (
+          <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden">
+            <div className="hidden sm:grid grid-cols-[1fr_120px_100px_160px_120px] gap-4 px-5 py-3 bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              <span>Referência</span>
+              <span>Método</span>
+              <span className="text-right">Valor</span>
+              <span>Status</span>
+              <span className="text-right">Data</span>
+            </div>
+            {transacoes.map((t) => {
+              const status = STATUS_LABEL[t.status];
+              return (
+                <div
+                  key={t.id}
+                  className="grid grid-cols-1 sm:grid-cols-[1fr_120px_100px_160px_120px] gap-2 sm:gap-4 px-5 py-4 border-t border-gray-100 items-start sm:items-center"
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-gray-900 truncate">
+                      {t.referencia || "Transação"}
+                    </p>
+                    {t.contraparte && (
+                      <p className="text-xs text-gray-500 truncate">{t.contraparte}</p>
+                    )}
+                  </div>
+                  <div className="text-sm text-gray-600">{METODO_LABEL[t.metodo]}</div>
+                  <div className="text-sm font-bold text-gray-900 sm:text-right">
+                    {formatMoeda(t.valor_centavos, t.moeda)}
+                  </div>
+                  <div>
+                    <span
+                      className={`inline-block px-2.5 py-1 text-xs font-semibold rounded-full border ${status.color}`}
+                    >
+                      {status.label}
+                    </span>
+                    {t.conekta_lock && t.status === "em_garantia" && (
+                      <span className="ml-1.5 inline-flex items-center gap-1 text-[10px] text-purple font-medium">
+                        <Lock className="w-2.5 h-2.5" />
+                        Lock
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-xs text-gray-500 sm:text-right">
+                    {formatData(t.created_at)}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* CTA final */}

@@ -437,6 +437,68 @@ export function useContagemFornecedoresDisponiveis(params: {
   });
 }
 
+// ─── Conekta Pay: minhas transações ────────────────────────────────────────
+
+export type PayStatus = Enums<'pay_status'>;
+export type PayMetodo = Enums<'pay_metodo'>;
+
+export interface MinhaTransacao {
+  id: string;
+  valor_centavos: number;
+  moeda: string;
+  metodo: PayMetodo;
+  status: PayStatus;
+  conekta_lock: boolean;
+  liberado_em: string | null;
+  created_at: string;
+  referencia: string | null;
+  contraparte: string | null;
+}
+
+export function useMinhasTransacoes() {
+  return useQuery<MinhaTransacao[]>({
+    queryKey: ['minhas-transacoes'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('conekta_pay_transacoes')
+        .select(
+          `
+          id,
+          valor_centavos,
+          moeda,
+          metodo,
+          status,
+          conekta_lock,
+          liberado_em,
+          created_at,
+          sos:sos_disparos ( titulo ),
+          posto:postos ( razao_social, nome_fantasia ),
+          fornecedor:fornecedores ( razao_social, nome_fantasia )
+        `
+        )
+        .order('created_at', { ascending: false });
+      if (error) throw new Error(error.message);
+      return (data ?? []).map((t: any): MinhaTransacao => ({
+        id: t.id,
+        valor_centavos: t.valor_centavos,
+        moeda: t.moeda,
+        metodo: t.metodo,
+        status: t.status,
+        conekta_lock: t.conekta_lock,
+        liberado_em: t.liberado_em,
+        created_at: t.created_at,
+        referencia: t.sos?.titulo ?? null,
+        contraparte:
+          t.fornecedor?.nome_fantasia ||
+          t.fornecedor?.razao_social ||
+          t.posto?.nome_fantasia ||
+          t.posto?.razao_social ||
+          null,
+      }));
+    },
+  });
+}
+
 // ─── SOS: criar disparo ────────────────────────────────────────────────────
 
 export interface CriarSosInput {
