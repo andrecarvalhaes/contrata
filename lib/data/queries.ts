@@ -437,6 +437,55 @@ export function useContagemFornecedoresDisponiveis(params: {
   });
 }
 
+// ─── Shop: produtos em destaque ────────────────────────────────────────────
+
+export interface ShopProdutoItem {
+  id: string;
+  nome: string;
+  descricao: string | null;
+  preco_centavos: number;
+  imagem_url: string | null;
+  loja: string;
+  fornecedor_id: string;
+}
+
+export function useShopProdutosDestaque(limit = 12) {
+  return useQuery<ShopProdutoItem[]>({
+    queryKey: ['shop-produtos-destaque', limit],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('shop_produtos')
+        .select(
+          `
+          id,
+          nome,
+          descricao,
+          preco_centavos,
+          imagem_url,
+          fornecedor_id,
+          fornecedor:fornecedores ( razao_social, nome_fantasia )
+        `
+        )
+        .eq('ativo', true)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+      if (error) throw new Error(error.message);
+      return (data ?? []).map((p: any): ShopProdutoItem => ({
+        id: p.id,
+        nome: p.nome,
+        descricao: p.descricao,
+        preco_centavos: p.preco_centavos,
+        imagem_url: p.imagem_url,
+        fornecedor_id: p.fornecedor_id,
+        loja:
+          p.fornecedor?.nome_fantasia ||
+          p.fornecedor?.razao_social ||
+          'Fornecedor',
+      }));
+    },
+  });
+}
+
 // ─── Conekta Pay: minhas transações ────────────────────────────────────────
 
 export type PayStatus = Enums<'pay_status'>;
