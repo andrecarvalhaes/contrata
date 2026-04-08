@@ -201,6 +201,48 @@ export type Database = {
         }
         Relationships: []
       }
+      fornecedor_documentos: {
+        Row: {
+          created_at: string
+          fornecedor_id: string
+          id: string
+          mime_type: string | null
+          motivo_recusa: string | null
+          nome_arquivo: string
+          status: Database["public"]["Enums"]["documento_status"]
+          storage_path: string
+          tamanho_bytes: number | null
+          tipo: Database["public"]["Enums"]["documento_tipo"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          fornecedor_id: string
+          id?: string
+          mime_type?: string | null
+          motivo_recusa?: string | null
+          nome_arquivo: string
+          status?: Database["public"]["Enums"]["documento_status"]
+          storage_path: string
+          tamanho_bytes?: number | null
+          tipo: Database["public"]["Enums"]["documento_tipo"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          fornecedor_id?: string
+          id?: string
+          mime_type?: string | null
+          motivo_recusa?: string | null
+          nome_arquivo?: string
+          status?: Database["public"]["Enums"]["documento_status"]
+          storage_path?: string
+          tamanho_bytes?: number | null
+          tipo?: Database["public"]["Enums"]["documento_tipo"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       fornecedor_servicos: {
         Row: {
           ativo: boolean
@@ -233,6 +275,7 @@ export type Database = {
       }
       fornecedores: {
         Row: {
+          aprovado_em: string | null
           ativo: boolean
           cep: string | null
           certificacoes: string[]
@@ -247,11 +290,14 @@ export type Database = {
           imagem_url: string | null
           latitude: number | null
           longitude: number | null
+          motivo_recusa: string | null
           nome_fantasia: string | null
           preco_inicial_centavos: number | null
           raio_atendimento_km: number | null
           rating_medio: number
           razao_social: string
+          status_onboarding: Database["public"]["Enums"]["onboarding_status"]
+          submetido_em: string | null
           telefone: string | null
           tempo_resposta_horas: number | null
           total_avaliacoes: number
@@ -262,6 +308,7 @@ export type Database = {
           whatsapp: string | null
         }
         Insert: {
+          aprovado_em?: string | null
           ativo?: boolean
           cep?: string | null
           certificacoes?: string[]
@@ -276,11 +323,14 @@ export type Database = {
           imagem_url?: string | null
           latitude?: number | null
           longitude?: number | null
+          motivo_recusa?: string | null
           nome_fantasia?: string | null
           preco_inicial_centavos?: number | null
           raio_atendimento_km?: number | null
           rating_medio?: number
           razao_social: string
+          status_onboarding?: Database["public"]["Enums"]["onboarding_status"]
+          submetido_em?: string | null
           telefone?: string | null
           tempo_resposta_horas?: number | null
           total_avaliacoes?: number
@@ -291,6 +341,7 @@ export type Database = {
           whatsapp?: string | null
         }
         Update: {
+          aprovado_em?: string | null
           ativo?: boolean
           cep?: string | null
           certificacoes?: string[]
@@ -305,11 +356,14 @@ export type Database = {
           imagem_url?: string | null
           latitude?: number | null
           longitude?: number | null
+          motivo_recusa?: string | null
           nome_fantasia?: string | null
           preco_inicial_centavos?: number | null
           raio_atendimento_km?: number | null
           rating_medio?: number
           razao_social?: string
+          status_onboarding?: Database["public"]["Enums"]["onboarding_status"]
+          submetido_em?: string | null
           telefone?: string | null
           tempo_resposta_horas?: number | null
           total_avaliacoes?: number
@@ -737,10 +791,21 @@ export type Database = {
         Args: { target: Database["public"]["Enums"]["user_role"] }
         Returns: boolean
       }
+      current_user_fornecedor_id: { Args: never; Returns: string }
       is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
       assinatura_status: "ativa" | "cancelada" | "inadimplente" | "expirada"
+      documento_status: "pendente" | "aprovado" | "recusado"
+      documento_tipo:
+        | "cnpj_cartao"
+        | "contrato_social"
+        | "alvara_funcionamento"
+        | "certificado_tecnico"
+        | "comprovante_endereco"
+        | "rg_responsavel"
+        | "outro"
+      onboarding_status: "rascunho" | "em_analise" | "aprovado" | "recusado"
       pay_metodo: "cartao" | "pix" | "boleto"
       pay_status:
         | "pendente"
