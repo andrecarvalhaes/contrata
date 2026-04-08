@@ -8,6 +8,7 @@ import {
   FornecedorSidebarProvider,
   FornecedorSidebarTrigger,
 } from "@/components/fornecedor/FornecedorSidebar";
+import { OnboardingGate } from "@/components/fornecedor/OnboardingGate";
 
 export default function FornecedorLayout({ children }: { children: ReactNode }) {
   return (
@@ -36,7 +37,7 @@ export default function FornecedorLayout({ children }: { children: ReactNode }) 
               </div>
             </header>
             <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-              {children}
+              <OnboardingGate>{children}</OnboardingGate>
             </main>
           </div>
         </div>
