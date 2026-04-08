@@ -11,9 +11,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Framework**: Next.js 16 (App Router) with TypeScript
 - **Styling**: Tailwind CSS 4
 - **State Management**: React Query (@tanstack/react-query)
-- **Authentication**: Firebase Auth (email/password + Google OAuth)
-- **Database**: Firebase Firestore
-- **Payments**: Conekta API (Mexican payment processor)
+- **Authentication**: Supabase Auth (email/password + Google OAuth via PKCE)
+- **Database**: Supabase Postgres (com RLS por papel posto/fornecedor/admin)
+- **Payments**: Conekta API (processamento virá via Supabase Edge Functions)
+- **Hosting**: Firebase Hosting (static export)
 - **Fonts**: Outfit (display), Montserrat (body)
 - **Icons**: lucide-react only (never use emojis)
 
@@ -27,56 +28,67 @@ npm run dev              # Runs on http://localhost:3000
 npm run build            # Creates static export for Firebase Hosting
 npm start                # Serves production build locally
 
-# Não há scripts de lint ou test configurados no package.json
+npm run lint             # ESLint
+npm run typecheck        # tsc --noEmit
 ```
 
-Note: Production builds use static export (`output: "export"`) for Firebase Hosting deployment. Development mode runs without this restriction.
+Production builds use static export (`output: "export"` em produção) para Firebase Hosting. Desenvolvimento (`npm run dev`) roda sem essa restrição.
 
 ## Architecture
 
 ### Route Groups
 
-The app uses Next.js route groups for layout organization:
-
-- **`(auth)/`** - Authentication pages (login, cadastro, recuperar-senha)
-  - Shared auth layout at `app/(auth)/layout.tsx`
-  - Multi-step registration with role selection (posto/fornecedor)
-
-- **`(dashboard)/`** - Protected dashboard pages (home, shop, sos, conekta-pay, solicitacoes)
-  - Shared dashboard layout with sidebar at `app/(dashboard)/layout.tsx`
-  - Protected by authentication checks
-
-- **Public routes** - Landing page, marketplace, service info pages (conheca/, seja-fornecedor, chat)
+- **`(auth)/`** — Autenticação (login, cadastro, recuperar-senha). Layout compartilhado em `app/(auth)/layout.tsx`.
+- **`(dashboard)/`** — Páginas autenticadas (home, marketplace interno, shop, sos, conekta-pay, solicitacoes). Protegidas por `ProtectedRoute`.
+- **Rotas públicas** — Landing, marketplace público, páginas institucionais (`conheca/`, `seja-fornecedor`, `chat`), e `app/auth/callback` para OAuth PKCE.
 
 ### Authentication Flow
 
-Firebase Authentication is wrapped in a custom AuthProvider:
+Supabase Auth via `createClient` (@supabase/supabase-js) com storage em `localStorage` (o projeto é SPA estática — não usa cookies SSR).
 
-1. **Provider Setup**: `app/providers.tsx` wraps React Query and AuthProvider
-2. **Auth Hook**: `lib/hooks/useAuth.ts` manages auth state and profile loading
-3. **User Roles**: Users have one of three roles: `posto`, `fornecedor`, or `admin`
-4. **User Profile**: Stored in Firestore `users/{uid}` collection with:
-   - `displayName`, `email`, `role`
-   - `conektaCustomerId` (linked payment account)
-   - `createdAt`, `updatedAt` timestamps
+1. **Client**: `lib/supabase/client.ts` expõe um proxy lazy para o Supabase client (singleton). `detectSessionInUrl` está **desligado** porque `/auth/callback` faz o exchange manualmente.
+2. **Helpers de auth**: `lib/supabase/auth.ts` expõe `signUp`, `signIn`, `signInWithGoogle`, `signOut`, `resetPassword`, `getUserProfile`, `onAuthChange`.
+3. **Hook**: `lib/hooks/useAuth.ts` escuta `onAuthStateChange` e carrega o perfil de `public.users`.
+4. **Provider**: `components/providers/AuthProvider.tsx` expõe `useAuthContext()`.
+5. **Trigger do banco**: `auth.users` inserts disparam `public.handle_new_auth_user()` que cria o perfil em `public.users` com o `role` do `raw_user_meta_data`.
+6. **Roles**: `posto`, `fornecedor`, `admin`.
 
-Access auth state via `useAuthContext()` from any component.
+### Data Layer (Supabase)
+
+Tabelas principais em `public`:
+
+- **Identidade**: `users`, `postos`, `posto_lojas`
+- **Catálogo**: `categorias_servico`, `servicos`, `fornecedores`, `fornecedor_servicos`
+- **SOS**: `sos_disparos`, `sos_propostas`
+- **Pagamentos**: `conekta_pay_transacoes`, `conekta_pay_historico`
+- **Shop**: `shop_produtos`, `shop_pedidos`, `shop_pedido_itens`
+- **Avaliações**: `avaliacoes` (trigger recalcula `fornecedores.rating_medio`)
+- **Assinaturas**: `planos_fornecedor`, `assinaturas`
+- **View**: `v_categorias_com_contagem` (categoria + contagem de fornecedores para o filtro lateral)
+
+Todas as tabelas têm **RLS habilitado** com policies baseadas em helpers:
+`is_admin()`, `current_posto_ids()`, `current_fornecedor_ids()`.
+
+### Query patterns
+
+Todas as leituras de dados vão por `lib/data/queries.ts` usando React Query:
+
+- `useCategorias()`
+- `useFornecedores({ search, categoriaSlug, estado })`
+- `useFornecedor(id)`
+- `useMinhasLojas()`
+- `useMinhasSolicitacoes(status?)`
+- `useContagemFornecedoresDisponiveis({ cidade, categoriaSlug })`
+- `useMinhasTransacoes()`
+- `useCriarSosDisparo()` (mutation)
+
+Tipos gerados em `lib/supabase/types.ts` (a partir do schema Supabase). Use `Tables<'nome_tabela'>`, `TablesInsert<>`, `Enums<>` para tipagem forte.
 
 ### Payment Integration
 
-Conekta integration via `lib/conekta/client.ts`:
+A integração Conekta está **parcial**: o formulário de cartão existe em `components/payment/ConektaPaymentForm.tsx` mas o submit ainda mostra um aviso de "em construção" até a Edge Function da Conekta ser publicada no Supabase.
 
-- Creates/manages customers linked to Firebase users
-- Suporta pagamentos via cartão (projeto opera no Brasil)
-- Customer IDs stored in user profiles (`conektaCustomerId`)
-- Uses server-side private key for API calls
-
-### Data Patterns
-
-- **React Query** for all async operations (use `useQuery`, `useMutation`)
-- **Custom Hooks** in `lib/hooks/` for reusable logic (useAuth, useConekta, useSpeechRecognition)
-- **Service Layer** in `lib/data/services.ts` for mock/static data
-- **Firebase Utilities** in `lib/firebase/` for auth and config
+Histórico de transações lido de `conekta_pay_transacoes` via `useMinhasTransacoes()` na página `/conekta-pay`.
 
 ## Design System
 
@@ -91,48 +103,48 @@ purple: {
 }
 ```
 
-Use `text-purple`, `bg-purple`, `border-purple` for brand elements.
+Use `text-purple`, `bg-purple`, `border-purple` para elementos da marca.
 
 ### Typography
 
-- **Display Text**: `font-display` (Outfit) - headings, hero text
-- **Body Text**: `font-body` (Montserrat) - paragraphs, UI
+- **Display Text**: `font-display` (Outfit) — headings, hero text
+- **Body Text**: `font-body` (Montserrat) — paragraphs, UI
 
 ### Component Patterns
 
-- UI components in `components/ui/` (wavy-background, text-loop)
-- Feature components organized by domain (auth/, marketplace/, chat/, payment/)
-- Icons exclusively from `lucide-react` - never use emojis
+- UI components em `components/ui/` (wavy-background, text-loop)
+- Feature components organizados por domínio (auth/, marketplace/, chat/, payment/)
+- Icons exclusivamente de `lucide-react` — nunca emojis
 
 ## Environment Variables
 
-Required variables (see `.env.example`):
+Ver `.env.example`. Obrigatórias:
 
 ```bash
-# Firebase (all required)
-NEXT_PUBLIC_FIREBASE_API_KEY=
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
-NEXT_PUBLIC_FIREBASE_APP_ID=
-NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=
+# Supabase (Auth + Database)
+NEXT_PUBLIC_SUPABASE_URL=https://<project-ref>.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<publishable-or-anon-key>
+SUPABASE_SERVICE_ROLE_KEY=<só em edge functions, nunca no client>
 
-# Conekta Payments (required)
+# Conekta
 CONEKTA_PRIVATE_KEY=
 NEXT_PUBLIC_CONEKTA_PUBLIC_KEY=
 
-# Optional: AI Chat (Claude or OpenAI)
-ANTHROPIC_API_KEY=
-OPENAI_API_KEY=
+# Opcional — AI Chat
+# ANTHROPIC_API_KEY=
+# OPENAI_API_KEY=
 ```
 
 ## Key Files to Reference
 
-- **Next.js Config**: `next.config.ts` - static export configuration
-- **Auth Logic**: `lib/firebase/auth.ts` - signUp, signIn, signInWithGoogle, getUserProfile
-- **Type Definitions**: Check component props and Firebase types in respective files
-- **Route Protection**: Components use `ProtectedRoute` wrapper from `components/auth/ProtectedRoute.tsx`
+- **Next.js Config**: `next.config.ts` — static export em produção
+- **Supabase client**: `lib/supabase/client.ts` — singleton lazy com PKCE
+- **Auth helpers**: `lib/supabase/auth.ts`
+- **Queries**: `lib/data/queries.ts` — todas as leituras/escritas de dados
+- **Types gerados**: `lib/supabase/types.ts`
+- **Route Protection**: `components/auth/ProtectedRoute.tsx`
+- **OAuth callback**: `app/auth/callback/page.tsx`
+- **Deploy workflow**: `.github/workflows/firebase-deploy.yml`
 
 ## Next.js Version Notes
 
@@ -141,5 +153,14 @@ This project uses Next.js 16 which may have breaking changes from earlier versio
 1. Check `node_modules/next/dist/docs/` for current documentation
 2. Heed deprecation warnings in the console
 3. Use App Router conventions (not Pages Router)
+
+## Static Export Caveats
+
+O projeto usa `output: 'export'` em produção. Isso tem implicações importantes:
+
+- **API routes não funcionam** — toda lógica server-side tem que ir para Supabase Edge Functions
+- **Rotas dinâmicas** (`[param]`) exigem `generateStaticParams` — prefira query params (`/route?id=...`) quando o id é desconhecido em build time
+- **Cookies** não persistem de forma confiável em redirects cross-site — por isso usamos localStorage para a sessão Supabase
+- **useSearchParams** precisa estar dentro de `<Suspense>` para não quebrar o prerender
 
 @AGENTS.md
