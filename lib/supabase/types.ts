@@ -59,6 +59,8 @@ export type Database = {
           id: string
           nota: number
           posto_id: string
+          respondida_em: string | null
+          resposta_fornecedor: string | null
           shop_pedido_id: string | null
           sos_id: string | null
         }
@@ -69,6 +71,8 @@ export type Database = {
           id?: string
           nota: number
           posto_id: string
+          respondida_em?: string | null
+          resposta_fornecedor?: string | null
           shop_pedido_id?: string | null
           sos_id?: string | null
         }
@@ -79,6 +83,8 @@ export type Database = {
           id?: string
           nota?: number
           posto_id?: string
+          respondida_em?: string | null
+          resposta_fornecedor?: string | null
           shop_pedido_id?: string | null
           sos_id?: string | null
         }
