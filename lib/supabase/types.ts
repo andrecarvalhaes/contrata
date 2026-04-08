@@ -201,6 +201,78 @@ export type Database = {
         }
         Relationships: []
       }
+      fornecedor_anuncios: {
+        Row: {
+          ativo_desde: string | null
+          categoria_id: string
+          cidades_atendidas: string[] | null
+          cliques: number
+          created_at: string
+          descricao: string
+          fornecedor_id: string
+          fotos: string[]
+          id: string
+          ordem: number
+          pausado_em: string | null
+          preco_centavos: number | null
+          preco_modalidade: Database["public"]["Enums"]["preco_modalidade"]
+          raio_atendimento_km: number | null
+          resumo: string | null
+          servico_id: string | null
+          status: Database["public"]["Enums"]["anuncio_status"]
+          titulo: string
+          unidade_preco: string | null
+          updated_at: string
+          views: number
+        }
+        Insert: {
+          ativo_desde?: string | null
+          categoria_id: string
+          cidades_atendidas?: string[] | null
+          cliques?: number
+          created_at?: string
+          descricao: string
+          fornecedor_id: string
+          fotos?: string[]
+          id?: string
+          ordem?: number
+          pausado_em?: string | null
+          preco_centavos?: number | null
+          preco_modalidade?: Database["public"]["Enums"]["preco_modalidade"]
+          raio_atendimento_km?: number | null
+          resumo?: string | null
+          servico_id?: string | null
+          status?: Database["public"]["Enums"]["anuncio_status"]
+          titulo: string
+          unidade_preco?: string | null
+          updated_at?: string
+          views?: number
+        }
+        Update: {
+          ativo_desde?: string | null
+          categoria_id?: string
+          cidades_atendidas?: string[] | null
+          cliques?: number
+          created_at?: string
+          descricao?: string
+          fornecedor_id?: string
+          fotos?: string[]
+          id?: string
+          ordem?: number
+          pausado_em?: string | null
+          preco_centavos?: number | null
+          preco_modalidade?: Database["public"]["Enums"]["preco_modalidade"]
+          raio_atendimento_km?: number | null
+          resumo?: string | null
+          servico_id?: string | null
+          status?: Database["public"]["Enums"]["anuncio_status"]
+          titulo?: string
+          unidade_preco?: string | null
+          updated_at?: string
+          views?: number
+        }
+        Relationships: []
+      }
       fornecedor_documentos: {
         Row: {
           created_at: string
@@ -795,6 +867,7 @@ export type Database = {
       is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
+      anuncio_status: "rascunho" | "ativo" | "pausado" | "encerrado"
       assinatura_status: "ativa" | "cancelada" | "inadimplente" | "expirada"
       documento_status: "pendente" | "aprovado" | "recusado"
       documento_tipo:
@@ -816,6 +889,7 @@ export type Database = {
         | "reembolsada"
         | "falhou"
         | "cancelada"
+      preco_modalidade: "fixo" | "a_partir_de" | "sob_consulta"
       pedido_status:
         | "carrinho"
         | "aguardando_pagamento"
