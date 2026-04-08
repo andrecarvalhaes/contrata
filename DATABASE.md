@@ -20,6 +20,7 @@ Este documento descreve o schema do banco Conekta no Supabase. Ele é a referên
 | 008 | `fix_function_search_path` | correção de advisor: `SET search_path = public` nas funções |
 | 009 | `reseed_categorias_and_fornecedor_columns` | reseed com 16 categorias reais + colunas imagem_url/certificacoes/tempo_resposta_horas/preco_inicial_centavos em fornecedores + view `v_categorias_com_contagem` |
 | 010 | `performance_and_security_fixes` | view como SECURITY INVOKER, índices de FK faltando, policies com `(select auth.uid())` para evitar re-avaliação por linha, consolidação de policies `FOR ALL` em INSERT/UPDATE/DELETE específicos |
+| 011 | `storage_and_realtime` | buckets de storage (avatares, fornecedor-docs, shop-produtos) com policies; publica sos_disparos, sos_propostas e conekta_pay_transacoes no `supabase_realtime` |
 
 Para aplicar novas migrations, use o MCP do Supabase (`apply_migration`) ou o CLI.
 
@@ -148,6 +149,43 @@ mcp__claude_ai_Supabase__generate_typescript_types project_id=oqvljwhiiwxmoeyikw
 ```
 
 Atualize `lib/supabase/types.ts` manualmente se houver mudança. Os hooks em `lib/data/queries.ts` vão falhar no typecheck se os tipos estiverem desatualizados — é o sinal para regerar.
+
+## Storage
+
+Buckets configurados (migration 011):
+
+| Bucket | Público | Finalidade | Convenção de path |
+|---|---|---|---|
+| `avatares` | sim (leitura) | Avatares de usuário | `<user_id>/arquivo.ext` |
+| `fornecedor-docs` | não | Documentos do fornecedor (alvará, CNPJ, etc.) | `<fornecedor_id>/arquivo.ext` |
+| `shop-produtos` | sim (leitura) | Imagens dos produtos do shop | `<fornecedor_id>/<produto_id>/foto.ext` |
+
+Policies:
+- **avatares**: leitura pública; insert/update/delete apenas para o próprio user (path `<auth.uid()>/*`)
+- **fornecedor-docs**: leitura/escrita apenas para quem é dono do fornecedor (path `<fornecedor_id>/*`)
+- **shop-produtos**: leitura pública; escrita apenas para quem é dono do fornecedor
+
+## Realtime
+
+Tabelas publicadas em `supabase_realtime` (migration 011):
+
+- `sos_disparos` — mudanças de status do SOS ao vivo
+- `sos_propostas` — propostas chegando em tempo real para o posto
+- `conekta_pay_transacoes` — status de pagamento ao vivo
+
+Use `supabase.channel(...).on('postgres_changes', ...)` no cliente para assinar eventos.
+
+## Edge Functions
+
+3 funções deployadas (skeletons — precisam integração real com a API da Conekta e provider de notificação):
+
+| Nome | JWT | Finalidade |
+|---|---|---|
+| `conekta-webhook` | **não** (webhook externo) | Recebe eventos da Conekta (`charge.paid`, `charge.declined`, etc.), atualiza `conekta_pay_transacoes` e registra em `conekta_pay_historico` |
+| `sos-dispatch` | sim | Dado um `sos_id`, busca fornecedores ativos na cidade/categoria e notifica (hoje só loga — TODO integrar email/WhatsApp) |
+| `conekta-lock` | sim | Gerencia custódia do Conekta Lock: `hold` → `em_garantia`, `release` → `liberada`, `refund` → `reembolsada`. Atualiza status e grava histórico |
+
+URLs: `https://oqvljwhiiwxmoeyikwyq.supabase.co/functions/v1/<nome>`
 
 ## Backups
 
