@@ -1,107 +1,67 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Filter, Clock, CheckCircle, AlertCircle, Building2, ChevronRight, MessageSquare } from "lucide-react";
+import { useMinhasSolicitacoes, type MinhaSolicitacao, type SosStatus } from "@/lib/data/queries";
 
-type FilterType = "todas" | "aguardando" | "propostas" | "andamento" | "concluidas";
+type FilterType = "todas" | SosStatus;
 
-const solicitacoes = [
-  {
-    id: 1,
-    titulo: "Manutenção preventiva em bomba de combustível",
-    loja: "Posto Exemplo - São Paulo/SP",
-    categoria: "Bombas",
-    status: "aguardando",
-    statusLabel: "Aguardando propostas",
-    statusColor: "bg-amber-100 text-amber-700 border-amber-200",
-    tempo: "2 horas atrás",
-    propostas: 0,
-    urgencia: "normal",
-    descricao: "Bomba apresentando ruído anormal durante operação. Necessária verificação técnica.",
+const STATUS_UI: Record<SosStatus, { label: string; color: string }> = {
+  aberto: {
+    label: "Aguardando propostas",
+    color: "bg-amber-100 text-amber-700 border-amber-200",
   },
-  {
-    id: 2,
-    titulo: "Serviço de elétrica automotiva",
-    loja: "Auto Posto Centro - Campinas/SP",
-    categoria: "Elétrica",
-    status: "propostas",
-    statusLabel: "2 propostas recebidas",
-    statusColor: "bg-green-100 text-green-700 border-green-200",
-    tempo: "1 dia atrás",
-    propostas: 2,
-    urgencia: "normal",
-    descricao: "Instalação de sistema elétrico em novo ponto de abastecimento.",
+  em_andamento: {
+    label: "Em andamento",
+    color: "bg-blue-100 text-blue-700 border-blue-200",
   },
-  {
-    id: 3,
-    titulo: "Inspeção técnica NR-13 completa",
-    loja: "Posto BR Sul - Curitiba/PR",
-    categoria: "Inspeções",
-    status: "andamento",
-    statusLabel: "Em andamento",
-    statusColor: "bg-blue-100 text-blue-700 border-blue-200",
-    tempo: "3 dias atrás",
-    propostas: 1,
-    urgencia: "alta",
-    descricao: "Inspeção anual obrigatória dos tanques de combustível conforme NR-13.",
+  concluido: {
+    label: "Concluído",
+    color: "bg-gray-100 text-gray-600 border-gray-200",
   },
-  {
-    id: 4,
-    titulo: "Vazamento detectado no sistema hidráulico",
-    loja: "Posto Exemplo - São Paulo/SP",
-    categoria: "Hidráulica",
-    status: "concluidas",
-    statusLabel: "Concluído",
-    statusColor: "bg-gray-100 text-gray-600 border-gray-200",
-    tempo: "5 dias atrás",
-    propostas: 3,
-    urgencia: "alta",
-    descricao: "Reparo de vazamento identificado na tubulação principal.",
+  cancelado: {
+    label: "Cancelado",
+    color: "bg-red-100 text-red-700 border-red-200",
   },
-  {
-    id: 5,
-    titulo: "Calibração de dispensers",
-    loja: "Auto Posto Centro - Campinas/SP",
-    categoria: "Calibradores",
-    status: "andamento",
-    statusLabel: "Em andamento",
-    statusColor: "bg-blue-100 text-blue-700 border-blue-200",
-    tempo: "4 dias atrás",
-    propostas: 1,
-    urgencia: "normal",
-    descricao: "Calibração periódica de todos os bicos de abastecimento.",
-  },
-  {
-    id: 6,
-    titulo: "Instalação de câmeras de segurança",
-    loja: "Posto BR Sul - Curitiba/PR",
-    categoria: "Segurança",
-    status: "propostas",
-    statusLabel: "4 propostas recebidas",
-    statusColor: "bg-green-100 text-green-700 border-green-200",
-    tempo: "6 dias atrás",
-    propostas: 4,
-    urgencia: "normal",
-    descricao: "Instalação de sistema completo de CFTV com 8 câmeras.",
-  },
-];
+};
 
-const filters = [
-  { id: "todas", label: "Todas", count: 6 },
-  { id: "aguardando", label: "Aguardando", count: 1 },
-  { id: "propostas", label: "Com propostas", count: 2 },
-  { id: "andamento", label: "Em andamento", count: 2 },
-  { id: "concluidas", label: "Concluídas", count: 1 },
-];
+function formatTempoRelativo(iso: string): string {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const h = Math.floor(diffMs / (1000 * 60 * 60));
+  if (h < 1) return "agora";
+  if (h < 24) return `${h} hora${h > 1 ? "s" : ""} atrás`;
+  const d = Math.floor(h / 24);
+  if (d < 30) return `${d} dia${d > 1 ? "s" : ""} atrás`;
+  const m = Math.floor(d / 30);
+  return `${m} ${m === 1 ? "mês" : "meses"} atrás`;
+}
 
 export default function SolicitacoesPage() {
   const [filtroAtivo, setFiltroAtivo] = useState<FilterType>("todas");
+  const { data: solicitacoes = [], isLoading, error } = useMinhasSolicitacoes();
 
-  const solicitacoesFiltradas =
-    filtroAtivo === "todas"
-      ? solicitacoes
-      : solicitacoes.filter((s) => s.status === filtroAtivo);
+  const solicitacoesFiltradas = useMemo(() => {
+    if (filtroAtivo === "todas") return solicitacoes;
+    return solicitacoes.filter((s) => s.status === filtroAtivo);
+  }, [solicitacoes, filtroAtivo]);
+
+  const counts = useMemo(() => {
+    return {
+      todas: solicitacoes.length,
+      aberto: solicitacoes.filter((s) => s.status === "aberto").length,
+      em_andamento: solicitacoes.filter((s) => s.status === "em_andamento").length,
+      concluido: solicitacoes.filter((s) => s.status === "concluido").length,
+      cancelado: solicitacoes.filter((s) => s.status === "cancelado").length,
+    };
+  }, [solicitacoes]);
+
+  const filters: Array<{ id: FilterType; label: string; count: number }> = [
+    { id: "todas", label: "Todas", count: counts.todas },
+    { id: "aberto", label: "Aguardando", count: counts.aberto },
+    { id: "em_andamento", label: "Em andamento", count: counts.em_andamento },
+    { id: "concluido", label: "Concluídas", count: counts.concluido },
+  ];
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
@@ -112,7 +72,7 @@ export default function SolicitacoesPage() {
           <p className="text-gray-600 mt-1">Acompanhe o status das suas demandas</p>
         </div>
         <Link
-          href="/nova-solicitacao"
+          href="/sos"
           className="px-6 py-3 bg-gradient-to-r from-purple to-purple-medium text-white rounded-xl font-semibold hover:scale-105 transition-transform shadow-lg shadow-purple/20"
         >
           + Nova Solicitação
@@ -144,92 +104,123 @@ export default function SolicitacoesPage() {
 
       {/* Lista de Solicitações */}
       <div className="space-y-4">
-        {solicitacoesFiltradas.length === 0 ? (
+        {isLoading ? (
+          <div className="space-y-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="bg-white rounded-2xl h-32 border border-gray-100 animate-pulse" />
+            ))}
+          </div>
+        ) : error ? (
+          <div className="bg-red-50 border border-red-200 rounded-2xl p-6 text-sm text-red-600">
+            Erro ao carregar solicitações: {(error as Error).message}
+          </div>
+        ) : solicitacoesFiltradas.length === 0 ? (
           <div className="bg-white rounded-2xl p-12 text-center border border-gray-100">
             <div className="w-16 h-16 bg-purple/10 rounded-full flex items-center justify-center mx-auto mb-4">
               <MessageSquare className="w-8 h-8 text-purple" />
             </div>
             <h3 className="text-lg font-bold text-gray-900 mb-2">Nenhuma solicitação encontrada</h3>
-            <p className="text-gray-600 mb-6">Não há solicitações nesta categoria no momento</p>
+            <p className="text-gray-600 mb-6">
+              {filtroAtivo === "todas"
+                ? "Você ainda não criou nenhuma solicitação"
+                : "Nenhuma solicitação nessa categoria"}
+            </p>
             <Link
-              href="/nova-solicitacao"
+              href="/sos"
               className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple to-purple-medium text-white rounded-xl font-semibold hover:scale-105 transition-transform"
             >
               Criar primeira solicitação
             </Link>
           </div>
         ) : (
-          solicitacoesFiltradas.map((s) => (
-            <div
-              key={s.id}
-              className="bg-white rounded-2xl p-6 border border-gray-100 hover:border-purple/30 hover:shadow-xl transition-all group cursor-pointer"
-            >
-              <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
-                {/* Conteúdo principal */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start gap-4 mb-3">
-                    <div className="w-12 h-12 rounded-xl bg-purple/10 flex items-center justify-center flex-shrink-0 group-hover:bg-purple/20 transition-colors">
-                      {s.status === "concluidas" ? (
-                        <CheckCircle className="w-6 h-6 text-purple" />
-                      ) : s.urgencia === "alta" ? (
-                        <AlertCircle className="w-6 h-6 text-red-600" />
-                      ) : (
-                        <Clock className="w-6 h-6 text-purple" />
-                      )}
-                    </div>
-
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-lg font-bold text-gray-900 group-hover:text-purple transition-colors">
-                          {s.titulo}
-                        </h3>
-                        {s.urgencia === "alta" && s.status !== "concluidas" && (
-                          <span className="px-2 py-0.5 bg-red-100 text-red-700 text-xs font-semibold rounded-full">
-                            Urgente
-                          </span>
+          solicitacoesFiltradas.map((s: MinhaSolicitacao) => {
+            const statusUi = STATUS_UI[s.status];
+            const isUrgente = s.urgencia >= 3;
+            const lojaDisplay =
+              s.loja_nome && (s.cidade || s.estado)
+                ? `${s.loja_nome} — ${[s.cidade, s.estado].filter(Boolean).join("/")}`
+                : s.loja_nome ?? "—";
+            return (
+              <div
+                key={s.id}
+                className="bg-white rounded-2xl p-6 border border-gray-100 hover:border-purple/30 hover:shadow-xl transition-all group cursor-pointer"
+              >
+                <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start gap-4 mb-3">
+                      <div className="w-12 h-12 rounded-xl bg-purple/10 flex items-center justify-center flex-shrink-0 group-hover:bg-purple/20 transition-colors">
+                        {s.status === "concluido" ? (
+                          <CheckCircle className="w-6 h-6 text-purple" />
+                        ) : isUrgente ? (
+                          <AlertCircle className="w-6 h-6 text-red-600" />
+                        ) : (
+                          <Clock className="w-6 h-6 text-purple" />
                         )}
                       </div>
 
-                      <div className="flex items-center gap-2 mb-3">
-                        <Building2 className="w-4 h-4 text-gray-400" />
-                        <span className="text-sm text-gray-600">{s.loja}</span>
-                        <span className="text-gray-300">•</span>
-                        <span className="text-sm text-gray-500">{s.categoria}</span>
-                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="text-lg font-bold text-gray-900 group-hover:text-purple transition-colors">
+                            {s.titulo}
+                          </h3>
+                          {isUrgente && s.status !== "concluido" && (
+                            <span className="px-2 py-0.5 bg-red-100 text-red-700 text-xs font-semibold rounded-full">
+                              Urgente
+                            </span>
+                          )}
+                        </div>
 
-                      <p className="text-sm text-gray-600 leading-relaxed mb-3">
-                        {s.descricao}
-                      </p>
+                        <div className="flex items-center gap-2 mb-3">
+                          <Building2 className="w-4 h-4 text-gray-400" />
+                          <span className="text-sm text-gray-600">{lojaDisplay}</span>
+                          {s.categoria_nome && (
+                            <>
+                              <span className="text-gray-300">•</span>
+                              <span className="text-sm text-gray-500">{s.categoria_nome}</span>
+                            </>
+                          )}
+                        </div>
 
-                      <div className="flex items-center gap-3">
-                        <span className={`px-3 py-1 text-xs font-semibold rounded-full border ${s.statusColor}`}>
-                          {s.statusLabel}
-                        </span>
-                        {s.propostas > 0 && s.status !== "concluidas" && (
-                          <span className="text-xs text-gray-500 flex items-center gap-1">
-                            <MessageSquare className="w-3.5 h-3.5" />
-                            {s.propostas} {s.propostas === 1 ? "proposta" : "propostas"}
-                          </span>
+                        {s.descricao && (
+                          <p className="text-sm text-gray-600 leading-relaxed mb-3">
+                            {s.descricao}
+                          </p>
                         )}
+
+                        <div className="flex items-center gap-3">
+                          <span
+                            className={`px-3 py-1 text-xs font-semibold rounded-full border ${statusUi.color}`}
+                          >
+                            {s.propostas_count > 0 && s.status === "aberto"
+                              ? `${s.propostas_count} proposta${s.propostas_count > 1 ? "s" : ""} recebida${s.propostas_count > 1 ? "s" : ""}`
+                              : statusUi.label}
+                          </span>
+                          {s.propostas_count > 0 && s.status !== "concluido" && (
+                            <span className="text-xs text-gray-500 flex items-center gap-1">
+                              <MessageSquare className="w-3.5 h-3.5" />
+                              {s.propostas_count}{" "}
+                              {s.propostas_count === 1 ? "proposta" : "propostas"}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Sidebar */}
-                <div className="flex lg:flex-col items-center lg:items-end gap-3 lg:gap-4">
-                  <div className="flex items-center gap-1.5 text-gray-400">
-                    <Clock className="w-4 h-4" />
-                    <span className="text-xs">{s.tempo}</span>
+                  <div className="flex lg:flex-col items-center lg:items-end gap-3 lg:gap-4">
+                    <div className="flex items-center gap-1.5 text-gray-400">
+                      <Clock className="w-4 h-4" />
+                      <span className="text-xs">{formatTempoRelativo(s.created_at)}</span>
+                    </div>
+
+                    <button className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-purple hover:bg-purple/5 rounded-xl transition-colors">
+                      Ver detalhes <ChevronRight className="w-4 h-4" />
+                    </button>
                   </div>
-
-                  <button className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-purple hover:bg-purple/5 rounded-xl transition-colors group-hover:translate-x-1 transition-transform">
-                    Ver detalhes <ChevronRight className="w-4 h-4" />
-                  </button>
                 </div>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
 

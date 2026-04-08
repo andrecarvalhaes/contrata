@@ -1,6 +1,6 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase/client';
-import type { Tables } from '@/lib/supabase/types';
+import type { Enums, Tables } from '@/lib/supabase/types';
 
 // ─── Tipos expostos ────────────────────────────────────────────────────────
 
@@ -212,8 +212,8 @@ export function useFornecedor(id: string | null | undefined) {
       const primeiraCategoria = fAny.fornecedor_servicos?.[0]?.servico?.categoria;
 
       return {
-        id: fAny.id,
-        nome: fAny.nome_fantasia || fAny.razao_social,
+        id: fAny.id as string,
+        nome: (fAny.nome_fantasia || fAny.razao_social) as string,
         razao_social: fAny.razao_social,
         nome_fantasia: fAny.nome_fantasia,
         categoria_nome: primeiraCategoria?.nome ?? null,
@@ -249,6 +249,253 @@ export function useFornecedor(id: string | null | undefined) {
           autor_nome: av.posto?.user?.display_name ?? null,
         })),
       };
+    },
+  });
+}
+
+// ─── Lojas do posto do usuário atual ───────────────────────────────────────
+
+export interface MinhaLoja {
+  id: string;
+  nome: string;
+  posto_id: string;
+  posto_nome: string;
+  cidade: string | null;
+  estado: string | null;
+}
+
+export function useMinhasLojas() {
+  return useQuery<MinhaLoja[]>({
+    queryKey: ['minhas-lojas'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('posto_lojas')
+        .select(
+          `
+          id,
+          nome,
+          posto_id,
+          cidade,
+          estado,
+          ativa,
+          posto:postos ( razao_social, nome_fantasia )
+        `
+        )
+        .eq('ativa', true)
+        .order('nome');
+      if (error) throw new Error(error.message);
+      return (data ?? []).map((l: any) => ({
+        id: l.id,
+        nome: l.nome,
+        posto_id: l.posto_id,
+        posto_nome: l.posto?.nome_fantasia || l.posto?.razao_social || 'Posto',
+        cidade: l.cidade,
+        estado: l.estado,
+      }));
+    },
+  });
+}
+
+// ─── SOS: minhas solicitações ──────────────────────────────────────────────
+
+export type SosStatus = Enums<'sos_status'>;
+
+export interface MinhaSolicitacao {
+  id: string;
+  titulo: string;
+  descricao: string | null;
+  status: SosStatus;
+  urgencia: number;
+  created_at: string;
+  loja_nome: string | null;
+  cidade: string | null;
+  estado: string | null;
+  categoria_nome: string | null;
+  propostas_count: number;
+}
+
+export function useMinhasSolicitacoes(status?: SosStatus | 'todas') {
+  return useQuery<MinhaSolicitacao[]>({
+    queryKey: ['minhas-solicitacoes', status ?? 'todas'],
+    queryFn: async () => {
+      let query = supabase
+        .from('sos_disparos')
+        .select(
+          `
+          id,
+          titulo,
+          descricao,
+          status,
+          urgencia,
+          created_at,
+          loja:posto_lojas ( nome, cidade, estado ),
+          servico:servicos (
+            categoria:categorias_servico ( nome )
+          ),
+          sos_propostas ( id )
+        `
+        )
+        .order('created_at', { ascending: false });
+
+      if (status && status !== 'todas') {
+        query = query.eq('status', status);
+      }
+
+      const { data, error } = await query;
+      if (error) throw new Error(error.message);
+
+      return (data ?? []).map((s: any): MinhaSolicitacao => ({
+        id: s.id,
+        titulo: s.titulo,
+        descricao: s.descricao,
+        status: s.status,
+        urgencia: s.urgencia ?? 1,
+        created_at: s.created_at,
+        loja_nome: s.loja?.nome ?? null,
+        cidade: s.loja?.cidade ?? null,
+        estado: s.loja?.estado ?? null,
+        categoria_nome: s.servico?.categoria?.nome ?? null,
+        propostas_count: s.sos_propostas?.length ?? 0,
+      }));
+    },
+  });
+}
+
+// ─── SOS: contagem de fornecedores para disparo ────────────────────────────
+
+export function useContagemFornecedoresDisponiveis(params: {
+  cidade?: string | null;
+  categoriaSlug?: string | null;
+  enabled?: boolean;
+}) {
+  return useQuery<{ total: number; amostra: FornecedorListItem[] }>({
+    queryKey: ['sos-fornecedores-disponiveis', params.cidade, params.categoriaSlug],
+    enabled: params.enabled !== false && !!params.cidade,
+    queryFn: async () => {
+      let query = supabase
+        .from('fornecedores')
+        .select(
+          `
+          id,
+          razao_social,
+          nome_fantasia,
+          descricao,
+          cidade,
+          estado,
+          imagem_url,
+          verificado,
+          certificacoes,
+          rating_medio,
+          total_avaliacoes,
+          tempo_resposta_horas,
+          preco_inicial_centavos,
+          fornecedor_servicos (
+            servico:servicos (
+              categoria:categorias_servico ( slug, nome )
+            )
+          )
+        `
+        )
+        .eq('ativo', true);
+
+      if (params.cidade) {
+        query = query.eq('cidade', params.cidade);
+      }
+
+      const { data, error } = await query;
+      if (error) throw new Error(error.message);
+
+      let items = (data ?? []).map((f: any): FornecedorListItem => {
+        const primeiraCategoria = f.fornecedor_servicos?.[0]?.servico?.categoria;
+        return {
+          id: f.id,
+          nome: f.nome_fantasia || f.razao_social,
+          categoria_nome: primeiraCategoria?.nome ?? null,
+          categoria_slug: primeiraCategoria?.slug ?? null,
+          rating: Number(f.rating_medio ?? 0),
+          total_avaliacoes: f.total_avaliacoes ?? 0,
+          cidade: f.cidade,
+          estado: f.estado,
+          imagem_url: f.imagem_url,
+          verificado: f.verificado ?? false,
+          certificacoes: f.certificacoes ?? [],
+          descricao: f.descricao,
+          tempo_resposta_horas: f.tempo_resposta_horas,
+          preco_inicial_centavos: f.preco_inicial_centavos,
+        };
+      });
+
+      if (params.categoriaSlug) {
+        items = items.filter((i) => i.categoria_slug === params.categoriaSlug);
+      }
+
+      return {
+        total: items.length,
+        amostra: items.slice(0, 3),
+      };
+    },
+  });
+}
+
+// ─── SOS: criar disparo ────────────────────────────────────────────────────
+
+export interface CriarSosInput {
+  titulo: string;
+  descricao: string;
+  posto_loja_id: string;
+  categoria_slug: string;
+  urgencia?: number;
+}
+
+export function useCriarSosDisparo() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: CriarSosInput) => {
+      // Descobre posto_id a partir da loja
+      const { data: loja, error: lojaErr } = await supabase
+        .from('posto_lojas')
+        .select('posto_id')
+        .eq('id', input.posto_loja_id)
+        .maybeSingle();
+      if (lojaErr) throw new Error(lojaErr.message);
+      if (!loja) throw new Error('Loja não encontrada.');
+
+      // Descobre um servico_id da categoria escolhida (qualquer um serve só para ligar categoria)
+      const { data: cat } = await supabase
+        .from('categorias_servico')
+        .select('id')
+        .eq('slug', input.categoria_slug)
+        .maybeSingle();
+
+      let servico_id: string | null = null;
+      if (cat?.id) {
+        const { data: svc } = await supabase
+          .from('servicos')
+          .select('id')
+          .eq('categoria_id', cat.id)
+          .limit(1)
+          .maybeSingle();
+        servico_id = svc?.id ?? null;
+      }
+
+      const { data, error } = await supabase
+        .from('sos_disparos')
+        .insert({
+          posto_id: loja.posto_id,
+          posto_loja_id: input.posto_loja_id,
+          servico_id,
+          titulo: input.titulo,
+          descricao: input.descricao,
+          urgencia: input.urgencia ?? 1,
+          status: 'aberto',
+        })
+        .select('id')
+        .single();
+      if (error) throw new Error(error.message);
+      return data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['minhas-solicitacoes'] });
     },
   });
 }

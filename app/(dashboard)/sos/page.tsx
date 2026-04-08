@@ -1,21 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AlertTriangle, ChevronRight, Star, Info, X, CheckCircle, Clock } from "lucide-react";
-
-const fornecedores = [
-  { nome: "TechBombas SP", especialidade: "Bombas de combustível", cidade: "São Paulo", rating: 4.8 },
-  { nome: "Eletro Postos Ltda", especialidade: "Elétrica automotiva", cidade: "São Paulo", rating: 4.6 },
-  { nome: "Hidra Service", especialidade: "Hidráulica", cidade: "São Paulo", rating: 4.5 },
-];
-
-const categorias = [
-  "Bombas", "Elétrica", "Hidráulica", "Calibradores",
-  "Filtragem", "Segurança", "Civil", "Outros",
-];
-
-const lojas = ["Posto Exemplo", "Auto Posto Centro"];
+import {
+  useCategorias,
+  useContagemFornecedoresDisponiveis,
+  useCriarSosDisparo,
+  useMinhasLojas,
+} from "@/lib/data/queries";
 
 function StarRating({ value }: { value: number }) {
   return (
@@ -71,11 +64,43 @@ export default function SOSPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [descricao, setDescricao] = useState("");
-  const [loja, setLoja] = useState("");
-  const [categoria, setCategoria] = useState("");
+  const [lojaId, setLojaId] = useState("");
+  const [categoriaSlug, setCategoriaSlug] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
 
-  const canProceed = descricao.trim() && loja && categoria;
+  const { data: lojas = [], isLoading: loadingLojas } = useMinhasLojas();
+  const { data: categorias = [], isLoading: loadingCategorias } = useCategorias();
+  const criarSos = useCriarSosDisparo();
+
+  const lojaSelecionada = useMemo(
+    () => lojas.find((l) => l.id === lojaId),
+    [lojas, lojaId]
+  );
+
+  const { data: disponiveis } = useContagemFornecedoresDisponiveis({
+    cidade: lojaSelecionada?.cidade,
+    categoriaSlug: categoriaSlug || null,
+    enabled: step === 2,
+  });
+
+  const canProceed = descricao.trim() && lojaId && categoriaSlug;
+
+  const handleDispararSos = async () => {
+    if (!lojaSelecionada) return;
+    setErro(null);
+    try {
+      await criarSos.mutateAsync({
+        titulo: descricao.slice(0, 100),
+        descricao,
+        posto_loja_id: lojaId,
+        categoria_slug: categoriaSlug,
+      });
+      setStep(3);
+    } catch (err: any) {
+      setErro(err?.message || "Erro ao disparar SOS.");
+    }
+  };
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -142,13 +167,22 @@ export default function SOSPage() {
                 <div className="flex flex-col gap-2">
                   <label className="text-sm font-semibold text-[#1A1A2E]">Qual loja?</label>
                   <select
-                    value={loja}
-                    onChange={(e) => setLoja(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm text-[#2D2D2D] outline-none focus:border-[#DC2626] focus:ring-2 focus:ring-[#DC2626]/20 transition-all"
+                    value={lojaId}
+                    onChange={(e) => setLojaId(e.target.value)}
+                    disabled={loadingLojas}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm text-[#2D2D2D] outline-none focus:border-[#DC2626] focus:ring-2 focus:ring-[#DC2626]/20 transition-all disabled:bg-gray-50"
                   >
-                    <option value="">Selecione a loja</option>
+                    <option value="">
+                      {loadingLojas
+                        ? "Carregando lojas..."
+                        : lojas.length === 0
+                        ? "Nenhuma loja cadastrada"
+                        : "Selecione a loja"}
+                    </option>
                     {lojas.map((l) => (
-                      <option key={l} value={l}>{l}</option>
+                      <option key={l.id} value={l.id}>
+                        {l.nome} {l.cidade ? `— ${l.cidade}/${l.estado}` : ""}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -157,13 +191,18 @@ export default function SOSPage() {
                 <div className="flex flex-col gap-2">
                   <label className="text-sm font-semibold text-[#1A1A2E]">Categoria do serviço</label>
                   <select
-                    value={categoria}
-                    onChange={(e) => setCategoria(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm text-[#2D2D2D] outline-none focus:border-[#DC2626] focus:ring-2 focus:ring-[#DC2626]/20 transition-all"
+                    value={categoriaSlug}
+                    onChange={(e) => setCategoriaSlug(e.target.value)}
+                    disabled={loadingCategorias}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm text-[#2D2D2D] outline-none focus:border-[#DC2626] focus:ring-2 focus:ring-[#DC2626]/20 transition-all disabled:bg-gray-50"
                   >
-                    <option value="">Selecione a categoria</option>
+                    <option value="">
+                      {loadingCategorias ? "Carregando categorias..." : "Selecione a categoria"}
+                    </option>
                     {categorias.map((c) => (
-                      <option key={c} value={c}>{c}</option>
+                      <option key={c.slug} value={c.slug}>
+                        {c.nome}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -197,8 +236,12 @@ export default function SOSPage() {
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Resumo da solicitação</p>
               <p className="text-sm text-[#2D2D2D] leading-relaxed mb-3">{descricao}</p>
               <div className="flex gap-2">
-                <span className="text-xs bg-white border border-gray-200 text-gray-700 px-3 py-1.5 rounded-full font-medium">{loja}</span>
-                <span className="text-xs bg-[#DC2626]/10 border border-[#DC2626]/20 text-[#DC2626] px-3 py-1.5 rounded-full font-medium">{categoria}</span>
+                <span className="text-xs bg-white border border-gray-200 text-gray-700 px-3 py-1.5 rounded-full font-medium">
+                  {lojaSelecionada?.nome ?? "Loja"}
+                </span>
+                <span className="text-xs bg-[#DC2626]/10 border border-[#DC2626]/20 text-[#DC2626] px-3 py-1.5 rounded-full font-medium">
+                  {categorias.find((c) => c.slug === categoriaSlug)?.nome ?? categoriaSlug}
+                </span>
               </div>
             </div>
 
@@ -206,25 +249,41 @@ export default function SOSPage() {
             <div className="bg-green-50 border border-green-200 rounded-xl p-5 mb-6">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                  <span className="text-xl font-black text-green-700">12</span>
+                  <span className="text-xl font-black text-green-700">{disponiveis?.total ?? 0}</span>
                 </div>
                 <p className="text-base font-bold text-green-800">
-                  fornecedores encontrados em São Paulo, SP
+                  fornecedores encontrados
+                  {lojaSelecionada?.cidade ? ` em ${lojaSelecionada.cidade}, ${lojaSelecionada.estado}` : ""}
                 </p>
               </div>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {fornecedores.map((f) => (
-                  <div key={f.nome} className="flex flex-col bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-                    <p className="text-sm font-semibold text-[#1A1A2E] mb-1">{f.nome}</p>
-                    <p className="text-xs text-gray-500 mb-2">{f.especialidade}</p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-gray-400">{f.cidade}</span>
-                      <StarRating value={f.rating} />
-                    </div>
+              {disponiveis && disponiveis.total > 0 ? (
+                <>
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {disponiveis.amostra.map((f) => (
+                      <div key={f.id} className="flex flex-col bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                        <p className="text-sm font-semibold text-[#1A1A2E] mb-1">{f.nome}</p>
+                        <p className="text-xs text-gray-500 mb-2">{f.categoria_nome ?? "—"}</p>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-gray-400">
+                            {[f.cidade, f.estado].filter(Boolean).join(", ") || "—"}
+                          </span>
+                          <StarRating value={f.rating || 0} />
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-              <p className="text-xs text-gray-500 text-center mt-3">+9 outros fornecedores...</p>
+                  {disponiveis.total > disponiveis.amostra.length && (
+                    <p className="text-xs text-gray-500 text-center mt-3">
+                      +{disponiveis.total - disponiveis.amostra.length} outros fornecedores...
+                    </p>
+                  )}
+                </>
+              ) : (
+                <p className="text-sm text-gray-600 text-center py-4">
+                  Nenhum fornecedor ativo encontrado nessa região/categoria. Sua solicitação ficará
+                  aberta no marketplace.
+                </p>
+              )}
             </div>
 
             {/* Box pagamento */}
@@ -237,14 +296,16 @@ export default function SOSPage() {
               </div>
               <p className="text-xs text-gray-500 mb-5">Pagamento único. Sem taxa por proposta recebida.</p>
               <button
-                onClick={() => setStep(3)}
-                className="w-full flex items-center justify-center gap-2 py-4 bg-[#10B981] hover:bg-[#059669] text-white font-bold rounded-xl transition-colors text-base shadow-lg"
+                onClick={handleDispararSos}
+                disabled={criarSos.isPending}
+                className="w-full flex items-center justify-center gap-2 py-4 bg-[#10B981] hover:bg-[#059669] text-white font-bold rounded-xl transition-colors text-base shadow-lg disabled:opacity-60"
               >
                 <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current">
                   <path d="M20.5 12c0-4.7-3.8-8.5-8.5-8.5S3.5 7.3 3.5 12s3.8 8.5 8.5 8.5 8.5-3.8 8.5-8.5zm-8.5 6c-3.3 0-6-2.7-6-6s2.7-6 6-6 6 2.7 6 6-2.7 6-6 6zm-1-9v2h2V9h-2zm0 4v4h2v-4h-2z" />
                 </svg>
-                Pagar com Pix — R$ 47,90
+                {criarSos.isPending ? "Disparando..." : "Disparar SOS — R$ 47,90"}
               </button>
+              {erro && <p className="text-xs text-red-600 mt-3 text-center">{erro}</p>}
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3">
@@ -280,7 +341,9 @@ export default function SOSPage() {
             <div className="text-center">
               <h2 className="text-2xl sm:text-3xl font-black text-[#1A1A2E] mb-3">
                 Solicitação enviada para<br />
-                <span className="text-[#DC2626]">12 fornecedores!</span>
+                <span className="text-[#DC2626]">
+                  {disponiveis?.total ?? 0} fornecedores!
+                </span>
               </h2>
               <p className="text-base text-gray-600 leading-relaxed">
                 Você receberá notificações conforme as propostas chegarem
@@ -298,7 +361,7 @@ export default function SOSPage() {
             </div>
 
             <button
-              onClick={() => router.push("/home")}
+              onClick={() => router.push("/solicitacoes")}
               className="w-full max-w-md py-4 bg-[#E05C1A] hover:bg-[#c54d15] text-white font-bold rounded-xl transition-colors text-base shadow-lg"
             >
               Ver propostas em tempo real
