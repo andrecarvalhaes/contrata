@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { ShoppingCart, Star, ArrowRight, AlertTriangle, Tag, ChevronDown, ChevronUp, SlidersHorizontal } from "lucide-react";
+import { ShoppingCart, Star, ArrowRight, AlertTriangle, Tag, ChevronDown, ChevronUp, SlidersHorizontal, Package } from "lucide-react";
 import { useState, useRef } from "react";
+import { useShopProdutosDestaque } from "@/lib/data/queries";
 
 const categoriasFornecedores = [
   {
@@ -125,164 +126,6 @@ const bannersPublicitarios = [
   },
 ];
 
-const produtosDestaque = [
-  {
-    id: 1,
-    nome: "Bomba Submersa 3CV Premium",
-    loja: "TechPosto Store",
-    preco: 1890.0,
-    precoAntigo: 2400,
-    rating: 4.8,
-    avaliacoes: 42,
-    desconto: 21,
-    foto: "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=400&h=400&fit=crop",
-  },
-  {
-    id: 2,
-    nome: "Calibrador Digital Automático",
-    loja: "TechPosto Store",
-    preco: 459.9,
-    rating: 4.7,
-    avaliacoes: 28,
-    foto: "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=400&h=400&fit=crop",
-  },
-  {
-    id: 3,
-    nome: "Câmera IP 4K com Visão Noturna",
-    loja: "SafetyPosto",
-    preco: 599.0,
-    precoAntigo: 799,
-    rating: 4.8,
-    avaliacoes: 89,
-    desconto: 25,
-    foto: "https://images.unsplash.com/photo-1557597774-9d273605dfa9?w=400&h=400&fit=crop",
-  },
-  {
-    id: 4,
-    nome: "Sensor de Nível Combustível Digital",
-    loja: "TechPosto Store",
-    preco: 320.0,
-    rating: 4.9,
-    avaliacoes: 67,
-    foto: "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=400&h=400&fit=crop",
-  },
-  {
-    id: 5,
-    nome: "Mangueira Hidráulica Reforçada 1/2\"",
-    loja: "Hidra Parts",
-    preco: 189.0,
-    precoAntigo: 250,
-    rating: 4.6,
-    avaliacoes: 56,
-    desconto: 24,
-    foto: "https://images.unsplash.com/photo-1607400201889-565b1ee75f8e?w=400&h=400&fit=crop",
-  },
-  {
-    id: 6,
-    nome: "Extintor CO2 6kg Certificado",
-    loja: "SafetyPosto",
-    preco: 289.0,
-    rating: 4.7,
-    avaliacoes: 34,
-    foto: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=400&fit=crop",
-  },
-  {
-    id: 7,
-    nome: "Painel Elétrico Bomba Completo",
-    loja: "Eletro Posto SP",
-    preco: 890.0,
-    rating: 4.8,
-    avaliacoes: 45,
-    foto: "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=400&h=400&fit=crop",
-  },
-  {
-    id: 8,
-    nome: "Kit Ferramentas Automotivas 120 Peças",
-    loja: "TechPosto Store",
-    preco: 349.0,
-    precoAntigo: 499,
-    rating: 4.5,
-    avaliacoes: 23,
-    desconto: 30,
-    foto: "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=400&h=400&fit=crop",
-  },
-  {
-    id: 9,
-    nome: "Filtro de Combustível Universal",
-    loja: "AutoPeças Pro",
-    preco: 45.9,
-    rating: 4.6,
-    avaliacoes: 156,
-    foto: "https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=400&h=400&fit=crop",
-  },
-  {
-    id: 10,
-    nome: "Lubrificante Industrial 20L",
-    loja: "Eletro Posto SP",
-    preco: 219.0,
-    precoAntigo: 280,
-    rating: 4.5,
-    avaliacoes: 78,
-    desconto: 22,
-    foto: "https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=400&h=400&fit=crop",
-  },
-];
-
-const fornecedoresDestaque = [
-  {
-    id: 1,
-    name: "TechPetro Manutenção",
-    category: "Manutenção de Bombas",
-    rating: 4.8,
-    reviews: 127,
-    location: "São Paulo, SP",
-    distance: "2.5 km",
-    verified: true,
-    certifications: ["NR-13", "ISO 9001"],
-    responseTime: "2h",
-    startingPrice: 350,
-  },
-  {
-    id: 2,
-    name: "Posto Service Pro",
-    category: "Limpeza de Tanques",
-    rating: 4.9,
-    reviews: 203,
-    location: "São Paulo, SP",
-    distance: "3.8 km",
-    verified: true,
-    certifications: ["NR-13", "ISO 14001"],
-    responseTime: "1h",
-    startingPrice: 1200,
-  },
-  {
-    id: 3,
-    name: "Elétrica Industrial Santos",
-    category: "Elétrica",
-    rating: 4.7,
-    reviews: 89,
-    location: "Santos, SP",
-    distance: "5.2 km",
-    verified: true,
-    certifications: ["NR-10", "NR-12"],
-    responseTime: "3h",
-    startingPrice: 280,
-  },
-  {
-    id: 4,
-    name: "AutoPosto Soluções",
-    category: "Manutenção Completa",
-    rating: 4.9,
-    reviews: 312,
-    location: "São Paulo, SP",
-    distance: "1.8 km",
-    verified: true,
-    certifications: ["NR-13", "ISO 9001", "ISO 14001"],
-    responseTime: "1h",
-    startingPrice: 400,
-  },
-];
-
 function formatPreco(v: number) {
   return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
@@ -297,6 +140,8 @@ export default function HomePage() {
     avaliacao: true,
   });
   const categoriasRef = useRef<HTMLDivElement>(null);
+
+  const { data: produtosDestaque, isLoading: loadingProdutos, error: errorProdutos } = useShopProdutosDestaque(12);
 
   const proximoBanner = () => {
     setBannerAtivo((prev) => (prev + 1) % bannersPublicitarios.length);
@@ -913,7 +758,7 @@ export default function HomePage() {
                 Filtros
               </button>
               <p className="text-xs sm:text-sm text-gray-600">
-                <span className="font-semibold text-gray-900">1.512</span> resultados
+                <span className="font-semibold text-gray-900">{produtosDestaque?.length ?? 0}</span> {produtosDestaque?.length === 1 ? "resultado" : "resultados"}
               </p>
             </div>
             <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
@@ -929,68 +774,66 @@ export default function HomePage() {
           </div>
 
           {/* Grid de Produtos */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4">
-            {produtosDestaque.map((p) => (
-              <div
-                key={p.id}
-                className="bg-white border border-gray-100 rounded-xl overflow-hidden hover:shadow-lg hover:border-gray-200 transition-all cursor-pointer group"
-              >
-                <div className="h-40 sm:h-44 md:h-48 relative overflow-hidden bg-white">
-                  <Image
-                    src={p.foto}
-                    alt={p.nome}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    unoptimized
-                  />
-                  {p.desconto && (
-                    <div className="absolute top-2 left-2 bg-red-500 text-white text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md">
-                      -{p.desconto}%
-                    </div>
-                  )}
-                </div>
-
-                <div className="p-2.5 sm:p-3">
-                  <p className="text-[10px] sm:text-xs text-gray-400 mb-1">{p.loja}</p>
-                  <h3 className="text-xs sm:text-sm font-medium text-gray-900 mb-2 line-clamp-2 min-h-[2.2rem] sm:min-h-[2.5rem] leading-tight">
-                    {p.nome}
-                  </h3>
-
-                  <div className="flex items-center gap-1 mb-2">
-                    <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-yellow-400 text-yellow-400" />
-                    <span className="text-[10px] sm:text-xs font-semibold text-gray-700">{p.rating}</span>
-                    <span className="text-[10px] sm:text-xs text-gray-400">({p.avaliacoes})</span>
-                  </div>
-
-                  <div>
-                    {p.precoAntigo && (
-                      <p className="text-[10px] sm:text-xs text-gray-400 line-through">{formatPreco(p.precoAntigo)}</p>
-                    )}
-                    <p className="text-base sm:text-lg font-bold text-gray-900">{formatPreco(p.preco)}</p>
-                  </div>
-                </div>
+          {loadingProdutos ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="bg-white border border-gray-100 rounded-xl h-[260px] animate-pulse"
+                />
+              ))}
+            </div>
+          ) : errorProdutos ? (
+            <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-sm text-red-600">
+              Erro ao carregar produtos: {(errorProdutos as Error).message}
+            </div>
+          ) : !produtosDestaque || produtosDestaque.length === 0 ? (
+            <div className="bg-white border border-gray-100 rounded-xl p-10 text-center">
+              <div className="w-14 h-14 bg-purple/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Package className="w-7 h-7 text-purple" />
               </div>
-            ))}
-          </div>
+              <h3 className="text-base font-bold text-gray-900 mb-1">Nenhum produto disponível ainda</h3>
+              <p className="text-sm text-gray-500">
+                Os produtos dos fornecedores parceiros aparecerão aqui quando forem cadastrados.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4">
+              {produtosDestaque.map((p) => (
+                <div
+                  key={p.id}
+                  className="bg-white border border-gray-100 rounded-xl overflow-hidden hover:shadow-lg hover:border-gray-200 transition-all cursor-pointer group"
+                >
+                  <div className="h-40 sm:h-44 md:h-48 relative overflow-hidden bg-gradient-to-br from-purple/5 to-purple-light/10 flex items-center justify-center">
+                    {p.imagem_url ? (
+                      <Image
+                        src={p.imagem_url}
+                        alt={p.nome}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        unoptimized
+                      />
+                    ) : (
+                      <Package className="w-16 h-16 text-purple/30" />
+                    )}
+                  </div>
 
-          {/* Paginação */}
-          <div className="flex justify-center items-center gap-1.5 sm:gap-2 mt-8">
-            <button className="px-3 sm:px-4 py-2 border border-gray-200 rounded-lg text-xs sm:text-sm text-gray-600 hover:bg-gray-50 transition-colors">
-              Anterior
-            </button>
-            <button className="px-3 sm:px-4 py-2 bg-purple text-white rounded-lg text-xs sm:text-sm font-semibold">
-              1
-            </button>
-            <button className="px-3 sm:px-4 py-2 border border-gray-200 rounded-lg text-xs sm:text-sm text-gray-600 hover:bg-gray-50 transition-colors">
-              2
-            </button>
-            <button className="hidden sm:block px-3 sm:px-4 py-2 border border-gray-200 rounded-lg text-xs sm:text-sm text-gray-600 hover:bg-gray-50 transition-colors">
-              3
-            </button>
-            <button className="px-3 sm:px-4 py-2 border border-gray-200 rounded-lg text-xs sm:text-sm text-gray-600 hover:bg-gray-50 transition-colors">
-              Próximo
-            </button>
-          </div>
+                  <div className="p-2.5 sm:p-3">
+                    <p className="text-[10px] sm:text-xs text-gray-400 mb-1">{p.loja}</p>
+                    <h3 className="text-xs sm:text-sm font-medium text-gray-900 mb-2 line-clamp-2 min-h-[2.2rem] sm:min-h-[2.5rem] leading-tight">
+                      {p.nome}
+                    </h3>
+
+                    <div>
+                      <p className="text-base sm:text-lg font-bold text-gray-900">
+                        {formatPreco(p.preco_centavos / 100)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
