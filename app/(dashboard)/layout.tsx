@@ -31,7 +31,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   };
 
   return (
-    <ProtectedRoute>
+    <ProtectedRoute requiredRole={["posto", "admin"]}>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple/[0.02] to-purple-light/[0.05] flex flex-col">
       {/* Header com navegação */}
       <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-purple/10 shadow-sm">

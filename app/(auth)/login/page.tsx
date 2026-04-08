@@ -9,6 +9,7 @@ import { z } from "zod";
 import { Eye, EyeOff } from "lucide-react";
 import { useAuthContext } from "@/components/providers/AuthProvider";
 import { signIn, signInWithGoogle } from "@/lib/supabase/auth";
+import { getHomeForRole } from "@/lib/auth/roleRoutes";
 
 const loginSchema = z.object({
   email: z
@@ -27,7 +28,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const router = useRouter();
-  const { isAuthenticated, loading: authLoading } = useAuthContext();
+  const { isAuthenticated, loading: authLoading, profile } = useAuthContext();
 
   const {
     register,
@@ -38,20 +39,20 @@ export default function LoginPage() {
   });
 
   useEffect(() => {
-    if (!authLoading && isAuthenticated) {
-      router.replace("/home");
+    // Só redireciona depois que o profile for carregado, pra saber a rota certa por role.
+    if (!authLoading && isAuthenticated && profile) {
+      router.replace(getHomeForRole(profile.role));
     }
-  }, [authLoading, isAuthenticated, router]);
+  }, [authLoading, isAuthenticated, profile, router]);
 
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
     setAuthError(null);
     try {
       await signIn(data.email, data.password);
-      router.replace("/home");
+      // O useEffect acima vai disparar o redirect assim que o profile carregar.
     } catch (err: any) {
       setAuthError(err?.message || "Não foi possível entrar. Verifique seus dados.");
-    } finally {
       setIsLoading(false);
     }
   };

@@ -1,24 +1,53 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthContext } from "@/components/providers/AuthProvider";
+import type { Enums } from "@/lib/supabase/types";
+import { getHomeForRole } from "@/lib/auth/roleRoutes";
+
+type UserRole = Enums<"user_role">;
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
+  /**
+   * Restringe o acesso a um ou mais papéis. Se omitido, basta estar autenticado.
+   * Usuários com papel diferente são redirecionados para `/home`.
+   */
+  requiredRole?: UserRole | UserRole[];
 }
 
-export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { isAuthenticated, loading } = useAuthContext();
+export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
+  const { isAuthenticated, loading, profile } = useAuthContext();
   const router = useRouter();
 
-  useEffect(() => {
-    if (!loading && !isAuthenticated) {
-      router.replace("/login");
-    }
-  }, [loading, isAuthenticated, router]);
+  const allowedRoles = useMemo(
+    () =>
+      requiredRole
+        ? Array.isArray(requiredRole)
+          ? requiredRole
+          : [requiredRole]
+        : null,
+    [requiredRole]
+  );
 
-  if (loading) {
+  const hasRequiredRole =
+    !allowedRoles || (profile?.role ? allowedRoles.includes(profile.role) : false);
+
+  useEffect(() => {
+    if (loading) return;
+
+    if (!isAuthenticated) {
+      router.replace("/login");
+      return;
+    }
+
+    if (allowedRoles && profile && !hasRequiredRole) {
+      router.replace(getHomeForRole(profile.role));
+    }
+  }, [loading, isAuthenticated, profile, hasRequiredRole, allowedRoles, router]);
+
+  if (loading || (allowedRoles && !profile)) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -29,7 +58,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !hasRequiredRole) {
     return null;
   }
 
