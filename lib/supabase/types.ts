@@ -447,6 +447,81 @@ export type Database = {
         }
         Relationships: []
       }
+      leads: {
+        Row: {
+          anuncio_id: string | null
+          cidade: string | null
+          contatado_em: string | null
+          created_at: string
+          email: string | null
+          empresa: string | null
+          estado: string | null
+          estagio: Database["public"]["Enums"]["lead_estagio"]
+          fornecedor_id: string
+          ganho_em: string | null
+          id: string
+          mensagem: string | null
+          motivo_perda: string | null
+          nome_contato: string | null
+          origem: Database["public"]["Enums"]["lead_origem"]
+          perdido_em: string | null
+          posto_id: string | null
+          sos_id: string | null
+          telefone: string | null
+          titulo: string
+          updated_at: string
+          valor_estimado_centavos: number | null
+        }
+        Insert: {
+          anuncio_id?: string | null
+          cidade?: string | null
+          contatado_em?: string | null
+          created_at?: string
+          email?: string | null
+          empresa?: string | null
+          estado?: string | null
+          estagio?: Database["public"]["Enums"]["lead_estagio"]
+          fornecedor_id: string
+          ganho_em?: string | null
+          id?: string
+          mensagem?: string | null
+          motivo_perda?: string | null
+          nome_contato?: string | null
+          origem: Database["public"]["Enums"]["lead_origem"]
+          perdido_em?: string | null
+          posto_id?: string | null
+          sos_id?: string | null
+          telefone?: string | null
+          titulo: string
+          updated_at?: string
+          valor_estimado_centavos?: number | null
+        }
+        Update: {
+          anuncio_id?: string | null
+          cidade?: string | null
+          contatado_em?: string | null
+          created_at?: string
+          email?: string | null
+          empresa?: string | null
+          estado?: string | null
+          estagio?: Database["public"]["Enums"]["lead_estagio"]
+          fornecedor_id?: string
+          ganho_em?: string | null
+          id?: string
+          mensagem?: string | null
+          motivo_perda?: string | null
+          nome_contato?: string | null
+          origem?: Database["public"]["Enums"]["lead_origem"]
+          perdido_em?: string | null
+          posto_id?: string | null
+          sos_id?: string | null
+          telefone?: string | null
+          titulo?: string
+          updated_at?: string
+          valor_estimado_centavos?: number | null
+        }
+        Relationships: []
+      }
       planos_fornecedor: {
         Row: {
           ativo: boolean
@@ -870,6 +945,14 @@ export type Database = {
       anuncio_status: "rascunho" | "ativo" | "pausado" | "encerrado"
       assinatura_status: "ativa" | "cancelada" | "inadimplente" | "expirada"
       documento_status: "pendente" | "aprovado" | "recusado"
+      lead_estagio:
+        | "novo"
+        | "contatado"
+        | "negociando"
+        | "proposta_enviada"
+        | "ganho"
+        | "perdido"
+      lead_origem: "sos" | "anuncio" | "perfil" | "manual"
       documento_tipo:
         | "cnpj_cartao"
         | "contrato_social"
