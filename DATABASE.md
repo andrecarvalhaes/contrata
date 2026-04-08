@@ -19,6 +19,7 @@ Este documento descreve o schema do banco Conekta no Supabase. Ele é a referên
 | 007 | `seed_categorias_servicos_planos` | seed inicial (substituído pelo 009) |
 | 008 | `fix_function_search_path` | correção de advisor: `SET search_path = public` nas funções |
 | 009 | `reseed_categorias_and_fornecedor_columns` | reseed com 16 categorias reais + colunas imagem_url/certificacoes/tempo_resposta_horas/preco_inicial_centavos em fornecedores + view `v_categorias_com_contagem` |
+| 010 | `performance_and_security_fixes` | view como SECURITY INVOKER, índices de FK faltando, policies com `(select auth.uid())` para evitar re-avaliação por linha, consolidação de policies `FOR ALL` em INSERT/UPDATE/DELETE específicos |
 
 Para aplicar novas migrations, use o MCP do Supabase (`apply_migration`) ou o CLI.
 
@@ -147,3 +148,17 @@ mcp__claude_ai_Supabase__generate_typescript_types project_id=oqvljwhiiwxmoeyikw
 ```
 
 Atualize `lib/supabase/types.ts` manualmente se houver mudança. Os hooks em `lib/data/queries.ts` vão falhar no typecheck se os tipos estiverem desatualizados — é o sinal para regerar.
+
+## Backups
+
+- Backups diários automáticos do Supabase (ativados por padrão em todos os tiers)
+- No tier gratuito: retenção de 7 dias
+- Para restore: painel Supabase → **Database → Backups → Restore**
+- Para backup manual ad-hoc: `pg_dump` via connection string (ver **Settings → Database**)
+
+## Advisors / Monitoramento
+
+Rode `mcp__claude_ai_Supabase__get_advisors` periodicamente (ou via painel **Database → Advisors**) para detectar regressões de performance/segurança. Issues não resolvidos atualmente:
+
+- **`auth_leaked_password_protection`** (WARN): liga em **Auth → Policies → Password Protection** no painel Supabase para checar senhas contra HaveIBeenPwned
+- **`unused_index`** (INFO): vários índices criados mas ainda sem uso — normal enquanto o app não tem tráfego real, ignorar
