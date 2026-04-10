@@ -14,6 +14,7 @@ import {
   Trash2,
   MoreVertical,
   ImageOff,
+  BarChart2,
 } from "lucide-react";
 import {
   useMeusAnuncios,
@@ -200,6 +201,14 @@ function AnuncioCard({ anuncio }: { anuncio: AnuncioListItem }) {
                   >
                     <Pencil className="w-4 h-4 text-gray-400" />
                     Editar
+                  </Link>
+                  <Link
+                    href={`/parceiro/anuncios/performance?id=${anuncio.id}`}
+                    className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-purple/5"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    <BarChart2 className="w-4 h-4 text-gray-400" />
+                    Performance
                   </Link>
                   {canActivate && (
                     <button

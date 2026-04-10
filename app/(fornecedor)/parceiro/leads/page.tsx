@@ -14,6 +14,7 @@ import {
   Building2,
   X,
 } from "lucide-react";
+import Link from "next/link";
 import {
   useMeusLeads,
   useMoverLead,
@@ -157,7 +158,12 @@ function LeadRow({ lead }: { lead: LeadListItem }) {
               {ORIGEM_LABEL[lead.origem]}
             </span>
           </div>
-          <h3 className="mt-2 text-base font-bold text-gray-900">{lead.titulo}</h3>
+          <Link
+            href={`/parceiro/leads/detalhe?id=${lead.id}`}
+            className="mt-2 block text-base font-bold text-gray-900 hover:text-purple transition-colors"
+          >
+            {lead.titulo}
+          </Link>
           <div className="mt-1 flex items-center gap-1.5 text-sm text-gray-600">
             <Building2 className="w-3.5 h-3.5 text-gray-400" />
             <span className="truncate">{nomeExibicao}</span>

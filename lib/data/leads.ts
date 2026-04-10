@@ -210,6 +210,91 @@ export function useRemoverLead() {
   });
 }
 
+// ─── Detalhe do lead ─────────────────────────────────────────────────────────
+
+export interface LeadDetalhe {
+  id: string;
+  titulo: string;
+  estagio: LeadEstagio;
+  origem: LeadOrigem;
+  mensagem: string | null;
+  valor_estimado_centavos: number | null;
+  motivo_perda: string | null;
+  nome_contato: string | null;
+  empresa: string | null;
+  telefone: string | null;
+  email: string | null;
+  cidade: string | null;
+  estado: string | null;
+  created_at: string;
+  contatado_em: string | null;
+  ganho_em: string | null;
+  perdido_em: string | null;
+  anuncio_id: string | null;
+  anuncio_titulo: string | null;
+  posto_id: string | null;
+  posto_nome: string | null;
+  posto_cidade: string | null;
+  posto_estado: string | null;
+  posto_endereco: string | null;
+  posto_cnpj: string | null;
+  posto_telefone: string | null;
+}
+
+export function useLeadDetalhe(id: string | null) {
+  return useQuery<LeadDetalhe>({
+    queryKey: ["lead-detalhe", id],
+    enabled: !!id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("leads")
+        .select(
+          `
+          id, titulo, estagio, origem, mensagem, valor_estimado_centavos,
+          motivo_perda, nome_contato, empresa, telefone, email,
+          cidade, estado, created_at, contatado_em, ganho_em, perdido_em,
+          anuncio_id,
+          anuncio:fornecedor_anuncios ( titulo ),
+          posto_id,
+          posto:postos ( razao_social, nome_fantasia, cidade, estado, endereco, cnpj, telefone )
+          `
+        )
+        .eq("id", id!)
+        .single();
+      if (error) throw new Error(error.message);
+      const l = data as any;
+      return {
+        id: l.id,
+        titulo: l.titulo,
+        estagio: l.estagio,
+        origem: l.origem,
+        mensagem: l.mensagem,
+        valor_estimado_centavos: l.valor_estimado_centavos,
+        motivo_perda: l.motivo_perda,
+        nome_contato: l.nome_contato,
+        empresa: l.empresa,
+        telefone: l.telefone,
+        email: l.email,
+        cidade: l.cidade,
+        estado: l.estado,
+        created_at: l.created_at,
+        contatado_em: l.contatado_em,
+        ganho_em: l.ganho_em,
+        perdido_em: l.perdido_em,
+        anuncio_id: l.anuncio_id,
+        anuncio_titulo: l.anuncio?.titulo ?? null,
+        posto_id: l.posto_id,
+        posto_nome: l.posto?.nome_fantasia || l.posto?.razao_social || null,
+        posto_cidade: l.posto?.cidade ?? null,
+        posto_estado: l.posto?.estado ?? null,
+        posto_endereco: l.posto?.endereco ?? null,
+        posto_cnpj: l.posto?.cnpj ?? null,
+        posto_telefone: l.posto?.telefone ?? null,
+      };
+    },
+  });
+}
+
 /**
  * Helper: formata valor em centavos pra reais.
  */
