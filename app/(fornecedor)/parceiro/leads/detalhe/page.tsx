@@ -67,7 +67,7 @@ function LeadDetalheContent() {
 
   if (!id) {
     return (
-      <div className="mx-auto max-w-3xl py-12 text-center">
+      <div className="mx-auto max-w-4xl py-12 text-center">
         <p className="text-sm text-gray-500">Lead não informado.</p>
       </div>
     );
@@ -77,7 +77,7 @@ function LeadDetalheContent() {
 
   if (error || !lead) {
     return (
-      <div className="mx-auto max-w-3xl py-12 text-center">
+      <div className="mx-auto max-w-4xl py-12 text-center">
         <AlertCircle className="w-10 h-10 text-red-400 mx-auto mb-3" />
         <p className="text-sm text-gray-600">Não foi possível carregar o lead.</p>
         <button
@@ -110,7 +110,7 @@ function LeadDetalheContent() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-6">
+    <div className="mx-auto w-full max-w-4xl space-y-6">
       {/* Voltar */}
       <Link
         href="/parceiro/leads"
@@ -429,7 +429,7 @@ function InfoRow({
 
 function Skeleton() {
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-6 animate-pulse">
+    <div className="mx-auto w-full max-w-4xl space-y-6 animate-pulse">
       <div className="h-4 w-32 bg-gray-100 rounded" />
       <div className="rounded-2xl border border-gray-100 bg-white p-6">
         <div className="h-6 w-1/3 bg-gray-100 rounded mb-3" />

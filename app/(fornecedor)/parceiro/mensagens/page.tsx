@@ -22,7 +22,7 @@ export default function MensagensPage() {
   const totalNaoLidas = conversas.reduce((s, c) => s + c.nao_lidas, 0);
 
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-6">
+    <div className="mx-auto w-full max-w-4xl space-y-6">
       {/* Header */}
       <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>

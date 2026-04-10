@@ -88,7 +88,7 @@ function PerformanceContent() {
 
   if (!id) {
     return (
-      <div className="mx-auto max-w-3xl py-12 text-center">
+      <div className="mx-auto max-w-5xl py-12 text-center">
         <p className="text-sm text-gray-500">Anúncio não informado.</p>
       </div>
     );
@@ -107,7 +107,7 @@ function PerformanceContent() {
   const dicas = gerarDicas(stats);
 
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-6">
+    <div className="mx-auto w-full max-w-5xl space-y-6">
       {/* Voltar */}
       <Link
         href="/parceiro/anuncios"
@@ -346,7 +346,7 @@ function StatCard({
 
 function Skeleton() {
   return (
-    <div className="mx-auto w-full max-w-3xl animate-pulse space-y-6">
+    <div className="mx-auto w-full max-w-5xl animate-pulse space-y-6">
       <div className="h-4 w-28 bg-gray-100 rounded" />
       <div className="rounded-2xl border border-gray-100 bg-white p-6 space-y-3">
         <div className="h-6 w-1/2 bg-gray-100 rounded" />

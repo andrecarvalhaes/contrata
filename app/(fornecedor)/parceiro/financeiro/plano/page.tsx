@@ -29,7 +29,7 @@ export default function PlanoPage() {
   const isLoading = loadingPlanos || loadingAssinatura;
 
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-6">
+    <div className="mx-auto w-full max-w-5xl space-y-6">
       {/* Voltar */}
       <Link
         href="/parceiro/financeiro"
